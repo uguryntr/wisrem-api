@@ -12,7 +12,7 @@ export default async function handler(req, res) {
   // Apify scraping
   if (action === 'apify') {
     const { type, target } = req.query;
-    const APIFY_TOKEN = apify_api_OAyVs3tOgzYjHJDV2cd0Ma1D3rQPTm48xXRu;
+    const APIFY_TOKEN = process.env.APIFY_TOKEN;
 
     
     try {
