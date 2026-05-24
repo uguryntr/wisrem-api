@@ -21,7 +21,8 @@ export default async function handler(req, res) {
       })
     });
     const d = await r.json();
-    res.status(200).json(d);
+    const text = d.content ? d.content.map(b => b.text || '').join('') : JSON.stringify(d);
+    res.status(200).json({ text });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
