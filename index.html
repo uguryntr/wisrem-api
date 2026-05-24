@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gayrimenkul Yatırım Getiri Hesaplayıcı | Akıllı Yatırım Analizi</title>
+    <meta name="description" content="Gayrimenkul yatırımınızın getirisini hesaplayın. Kira verimi, amortisman süresi, ödeme planı ve yatırımcı profili analizi.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animation">
+        <div class="bg-orb bg-orb-1"></div>
+        <div class="bg-orb bg-orb-2"></div>
+        <div class="bg-orb bg-orb-3"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                        <rect x="4" y="14" width="10" height="14" rx="1" fill="url(#g1)"/>
+                        <rect x="18" y="8" width="10" height="20" rx="1" fill="url(#g2)"/>
+                        <path d="M9 4L16 1L23 4" stroke="url(#g3)" stroke-width="2" stroke-linecap="round"/>
+                        <circle cx="9" cy="18" r="1.5" fill="rgba(255,255,255,0.8)"/>
+                        <circle cx="9" cy="23" r="1.5" fill="rgba(255,255,255,0.8)"/>
+                        <circle cx="23" cy="13" r="1.5" fill="rgba(255,255,255,0.8)"/>
+                        <circle cx="23" cy="18" r="1.5" fill="rgba(255,255,255,0.8)"/>
+                        <circle cx="23" cy="23" r="1.5" fill="rgba(255,255,255,0.8)"/>
+                        <defs>
+                            <linearGradient id="g1" x1="4" y1="14" x2="14" y2="28"><stop stop-color="#6366f1"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient>
+                            <linearGradient id="g2" x1="18" y1="8" x2="28" y2="28"><stop stop-color="#8b5cf6"/><stop offset="1" stop-color="#a78bfa"/></linearGradient>
+                            <linearGradient id="g3" x1="9" y1="1" x2="23" y2="4"><stop stop-color="#c4b5fd"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <span class="logo-title">YatırımHesap</span>
+                    <span class="logo-subtitle">Gayrimenkul Getiri Analizi</span>
+                </div>
+            </div>
+            <div class="header-badge">
+                <span class="badge-dot"></span>
+                Profesyonel Analiz
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1 class="hero-title">
+                Gayrimenkul Yatırım<br>
+                <span class="gradient-text">Getiri Hesaplayıcı</span>
+            </h1>
+            <p class="hero-description">
+                Yatırımınızın tüm finansal detaylarını analiz edin. Kira getirisi, amortisman süresi, 
+                değer artışı ve kişiselleştirilmiş yatırımcı profili raporu.
+            </p>
+        </div>
+    </section>
+
+    <!-- Calculator Section -->
+    <main class="calculator-section">
+        <div class="container">
+            <div class="calculator-layout">
+                <!-- Input Panel -->
+                <div class="input-panel glass-card" id="inputPanel">
+                    <div class="panel-header">
+                        <div class="panel-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 20V10"/>
+                                <path d="M18 20V4"/>
+                                <path d="M6 20v-4"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="panel-title">Yatırım Bilgileri</h2>
+                            <p class="panel-subtitle">Gayrimenkul detaylarını girin</p>
+                        </div>
+                    </div>
+
+                    <form id="calculatorForm" class="form-grid">
+                        <div class="input-group" id="group-salePrice">
+                            <label for="salePrice">
+                                <span class="label-icon">🏷️</span>
+                                Satış Fiyatı
+                            </label>
+                            <div class="input-wrapper">
+                                <input type="text" id="salePrice" placeholder="3.500.000" inputmode="numeric" required>
+                                <span class="input-suffix">₺</span>
+                            </div>
+                        </div>
+
+                        <div class="input-group" id="group-downPayment">
+                            <label for="downPayment">
+                                <span class="label-icon">💰</span>
+                                Peşinat
+                            </label>
+                            <div class="input-wrapper">
+                                <input type="text" id="downPayment" placeholder="1.050.000" inputmode="numeric" required>
+                                <span class="input-suffix">₺</span>
+                            </div>
+                            <span class="input-hint" id="downPaymentPercent">Satış fiyatının %0'ı</span>
+                        </div>
+
+                        <div class="input-group" id="group-installments">
+                            <label for="installments">
+                                <span class="label-icon">📅</span>
+                                Taksit Sayısı
+                            </label>
+                            <div class="input-wrapper">
+                                <input type="number" id="installments" placeholder="24" min="1" max="240" required>
+                                <span class="input-suffix">ay</span>
+                            </div>
+                        </div>
+
+                        <div class="input-group" id="group-monthlyRent">
+                            <label for="monthlyRent">
+                                <span class="label-icon">🏠</span>
+                                Beklenen Aylık Kira
+                            </label>
+                            <div class="input-wrapper">
+                                <input type="text" id="monthlyRent" placeholder="15.000" inputmode="numeric" required>
+                                <span class="input-suffix">₺</span>
+                            </div>
+                        </div>
+
+                        <div class="input-group" id="group-appreciation">
+                            <label for="appreciation">
+                                <span class="label-icon">📈</span>
+                                Yıllık Değer Artış Oranı
+                            </label>
+                            <div class="input-wrapper">
+                                <input type="number" id="appreciation" placeholder="25" min="0" max="100" step="0.1" required>
+                                <span class="input-suffix">%</span>
+                            </div>
+                        </div>
+
+                        <div class="input-group" id="group-monthlyExpenses">
+                            <label for="monthlyExpenses">
+                                <span class="label-icon">📋</span>
+                                Aylık Aidat / Giderler
+                            </label>
+                            <div class="input-wrapper">
+                                <input type="text" id="monthlyExpenses" placeholder="2.500" inputmode="numeric" required>
+                                <span class="input-suffix">₺</span>
+                            </div>
+                        </div>
+
+                        <div class="input-group full-width" id="group-deliveryDate">
+                            <label for="deliveryDate">
+                                <span class="label-icon">🗓️</span>
+                                Teslim Tarihi
+                            </label>
+                            <div class="input-wrapper">
+                                <input type="month" id="deliveryDate" required>
+                            </div>
+                            <span class="input-hint" id="deliveryHint">Kira geliri bu tarihten itibaren hesaplanır</span>
+                        </div>
+
+                        <div class="form-actions full-width">
+                            <button type="submit" class="btn-primary" id="calculateBtn">
+                                <span class="btn-text">Hesapla</span>
+                                <span class="btn-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M5 12h14"/>
+                                        <path d="m12 5 7 7-7 7"/>
+                                    </svg>
+                                </span>
+                            </button>
+                            <button type="button" class="btn-secondary" id="resetBtn">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                                    <path d="M3 3v5h5"/>
+                                </svg>
+                                Sıfırla
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Results Panel -->
+                <div class="results-panel" id="resultsPanel">
+                    <!-- Summary Cards -->
+                    <div class="summary-grid" id="summaryGrid">
+                        <div class="summary-card glass-card" id="card-payback" style="--delay: 0.1s">
+                            <div class="summary-icon payback-icon">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <polyline points="12 6 12 12 16 14"/>
+                                </svg>
+                            </div>
+                            <div class="summary-content">
+                                <span class="summary-label">Geri Ödeme Süresi</span>
+                                <span class="summary-value" id="paybackPeriod">—</span>
+                                <span class="summary-sub" id="paybackSub"></span>
+                            </div>
+                        </div>
+
+                        <div class="summary-card glass-card" id="card-yield" style="--delay: 0.2s">
+                            <div class="summary-icon yield-icon">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="1" x2="12" y2="23"/>
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                                </svg>
+                            </div>
+                            <div class="summary-content">
+                                <span class="summary-label">Yıllık Kira Getirisi</span>
+                                <span class="summary-value" id="annualYield">—</span>
+                                <span class="summary-sub" id="yieldSub"></span>
+                            </div>
+                        </div>
+
+                        <div class="summary-card glass-card" id="card-value3" style="--delay: 0.3s">
+                            <div class="summary-icon value3-icon">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
+                                    <polyline points="16 7 22 7 22 13"/>
+                                </svg>
+                            </div>
+                            <div class="summary-content">
+                                <span class="summary-label">3 Yıl Sonra Değer</span>
+                                <span class="summary-value" id="value3Year">—</span>
+                                <span class="summary-sub" id="value3Sub"></span>
+                            </div>
+                        </div>
+
+                        <div class="summary-card glass-card" id="card-value5" style="--delay: 0.4s">
+                            <div class="summary-icon value5-icon">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                                    <polyline points="7.5 4.21 12 6.81 16.5 4.21"/>
+                                    <polyline points="7.5 19.79 7.5 14.6 3 12"/>
+                                    <polyline points="21 12 16.5 14.6 16.5 19.79"/>
+                                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                                    <line x1="12" y1="22.08" x2="12" y2="12"/>
+                                </svg>
+                            </div>
+                            <div class="summary-content">
+                                <span class="summary-label">5 Yıl Sonra Değer</span>
+                                <span class="summary-value" id="value5Year">—</span>
+                                <span class="summary-sub" id="value5Sub"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Investor Profile -->
+                    <div class="investor-profile glass-card" id="investorProfile" style="display:none;">
+                        <div class="panel-header">
+                            <div class="panel-icon profile-icon-header">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="12" cy="7" r="4"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h2 class="panel-title">Yatırımcı Profil Analizi</h2>
+                                <p class="panel-subtitle">Bu yatırım kime uygun?</p>
+                            </div>
+                        </div>
+                        <div class="profile-content" id="profileContent">
+                            <!-- Dynamically populated -->
+                        </div>
+                    </div>
+
+                    <!-- Financial Summary -->
+                    <div class="financial-summary glass-card" id="financialSummary" style="display:none;">
+                        <div class="panel-header">
+                            <div class="panel-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                                    <line x1="1" y1="10" x2="23" y2="10"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h2 class="panel-title">Finansal Özet</h2>
+                                <p class="panel-subtitle">Toplam maliyet ve getiri analizi</p>
+                            </div>
+                        </div>
+                        <div class="financial-grid" id="financialGrid">
+                            <!-- Dynamically populated -->
+                        </div>
+                    </div>
+
+                    <!-- Payment Plan Table -->
+                    <div class="payment-plan glass-card" id="paymentPlan" style="display:none;">
+                        <div class="panel-header">
+                            <div class="panel-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                    <polyline points="14 2 14 8 20 8"/>
+                                    <line x1="16" y1="13" x2="8" y2="13"/>
+                                    <line x1="16" y1="17" x2="8" y2="17"/>
+                                    <polyline points="10 9 9 9 8 9"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h2 class="panel-title">Ödeme Planı</h2>
+                                <p class="panel-subtitle">Aylık taksit detayları</p>
+                            </div>
+                        </div>
+                        <div class="table-wrapper">
+                            <table class="payment-table" id="paymentTable">
+                                <thead>
+                                    <tr>
+                                        <th>Ay</th>
+                                        <th>Taksit Tutarı</th>
+                                        <th>Kümülatif Ödeme</th>
+                                        <th>Kira Geliri</th>
+                                        <th>Net Nakit Akışı</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="paymentTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>Bu hesaplayıcı yalnızca bilgilendirme amaçlıdır. Yatırım kararlarınız için profesyonel danışmanlık alınız.</p>
+            <p class="footer-copy">© 2026 YatırımHesap — Tüm hakları saklıdır.</p>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
