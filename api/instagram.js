@@ -1,40 +1,68 @@
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.status(200).end();
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  const { endpoint, token, action } = req.query;
+  const { endpoint, token, action, type, target } = req.query;
 
   // Apify scraping
   if (action === 'apify') {
-    const { type, target } = req.query;
     const APIFY_TOKEN = process.env.APIFY_TOKEN;
+    if (!APIFY_TOKEN) return res.status(500).json({ error: 'Apify token yok' });
 
-    
     try {
-      const actorMap = {
-        competitor: 'apify/instagram-profile-scraper',
-        hashtag: 'apify/instagram-hashtag-scraper',
-        trending: 'apify/instagram-search-scraper'
-      };
-      
-      const actor = actorMap[type] || 'apify/instagram-profile-scraper';
-      const input = type === 'hashtag' 
-        ? { hashtags: [target], resultsLimit: 20 }
-        : { usernames: [target], resultsLimit: 20 };
+      let input = {};
+      let actor = '';
 
-      const runRes = await fetch(`https://api.apify.com/v2/acts/${actor}/run-sync-get-dataset-items?token=${APIFY_TOKEN}`, {
+      if (type === 'competitor') {
+        actor = 'apify~instagram-profile-scraper';
+        input = { usernames: [target], resultsLimit: 1 };
+      } else if (type === 'hashtag') {
+        actor = 'apify~instagram-hashtag-scraper';
+        input = { hashtags: [target], resultsLimit: 20 };
+      }
+
+      // Start the actor run
+      const startRes = await fetch(`https://api.apify.com/v2/acts/${actor}/runs`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${APIFY_TOKEN}`
+        },
         body: JSON.stringify(input)
       });
-      
-      const data = await runRes.json();
+
+      const startData = await startRes.json();
+      const runId = startData.data?.id;
+
+      if (!runId) return res.status(500).json({ error: 'Run başlatılamadı', details: startData });
+
+      // Wait for run to finish (poll)
+      let status = 'RUNNING';
+      let attempts = 0;
+      while (status === 'RUNNING' && attempts < 30) {
+        await new Promise(r => setTimeout(r, 2000));
+        const statusRes = await fetch(`https://api.apify.com/v2/actor-runs/${runId}`, {
+          headers: { 'Authorization': `Bearer ${APIFY_TOKEN}` }
+        });
+        const statusData = await statusRes.json();
+        status = statusData.data?.status;
+        attempts++;
+      }
+
+      // Get dataset items
+      const datasetId = (await (await fetch(`https://api.apify.com/v2/actor-runs/${runId}`, {
+        headers: { 'Authorization': `Bearer ${APIFY_TOKEN}` }
+      })).json()).data?.defaultDatasetId;
+
+      const dataRes = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items`, {
+        headers: { 'Authorization': `Bearer ${APIFY_TOKEN}` }
+      });
+      const data = await dataRes.json();
       return res.status(200).json(data);
+
     } catch (error) {
       return res.status(500).json({ error: error.message });
     }
