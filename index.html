@@ -229,7 +229,7 @@ async function ai(p){
   const r=await fetch('/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:SYS,prompt:p})});
   if(!r.ok) throw new Error('AI hatası: '+r.status);
   const d=await r.json();
-  return d.text || d.content.map(b=>b.text||'').join('');
+  return d.content.map(b=>b.text||'').join('');
 }
 
 async function ig(ep){
@@ -384,8 +384,17 @@ async function doRival(){
   const btn=document.getElementById('btn-rival');
   btn.disabled=true;ld('rival-out');
   try{
-    const txt=await ai(`Gayrimenkul Instagram hesabı: ${h} (${c}). 1)Viral içerik formatları? 2)Wisrem ne öğrenmeli? 3)Wisrem avantajları (16.4K, Kıbrıs/Dubai/TR)? 4)Farklılaşma için 3 öneri.`);
-    document.getElementById('rival-out').innerHTML=`<div class="card"><div class="lbl">👁 ${h}</div><div class="res">${txt.replace(/\n/g,'<br>')}</div></div>`;
+    let apifyData='';
+    try{
+      const ap=await fetch(`/api/instagram?action=apify&type=competitor&target=${encodeURIComponent(h)}`);
+      const apd=await ap.json();
+      if(Array.isArray(apd)&&apd.length){
+        const p=apd[0];
+        apifyData=`GERÇEK VERİ — Takipçi: ${p.followersCount||'?'}, Gönderi: ${p.postsCount||'?'}, Takip: ${p.followsCount||'?'}. `;
+      }
+    }catch(e){}
+    const txt=await ai(`Gayrimenkul Instagram hesabı: ${h} (${c}). ${apifyData}1)Viral içerik formatları? 2)Wisrem ne öğrenmeli? 3)Wisrem avantajları (16.4K, Kıbrıs/Dubai/TR)? 4)Farklılaşma için 3 öneri.`);
+    document.getElementById('rival-out').innerHTML=`<div class="card"><div class="lbl">👁 ${h} ${apifyData?'<span style="color:var(--gr);font-size:9px">● GERÇEK VERİ</span>':''}</div><div class="res">${txt.replace(/\n/g,'<br>')}</div></div>`;
   }catch(e){document.getElementById('rival-out').innerHTML=`<div class="err">${e.message}</div>`;}
   btn.disabled=false;
 }
