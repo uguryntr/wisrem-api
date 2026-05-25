@@ -14,14 +14,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t);min-he
 .logo{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:var(--g);letter-spacing:3px}
 .logo-s{font-family:'DM Mono',monospace;font-size:9px;color:#ffffff40;letter-spacing:2px;margin-top:2px}
 .bdg{font-family:'DM Mono',monospace;font-size:10px;padding:4px 10px;border-radius:4px;letter-spacing:1px}
-.bdg.on{background:var(--g);color:var(--a)}
-.bdg.off{background:#ffffff20;color:#fff}
+.bdg.on{background:var(--g);color:var(--a)}.bdg.off{background:#ffffff20;color:#fff}
 .nav{background:var(--s);border-bottom:2px solid var(--b);display:flex;overflow-x:auto;scrollbar-width:none}
 .nav::-webkit-scrollbar{display:none}
 .tab{padding:12px 16px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--m);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;transition:all .2s;margin-bottom:-2px}
 .tab.active{color:var(--a);border-bottom-color:var(--g);font-weight:600}
 .tab:hover:not(.active){color:var(--a)}
-.main{padding:20px;max-width:860px;margin:0 auto}
+.main{padding:20px;max-width:900px;margin:0 auto}
 .pnl{display:none}.pnl.active{display:block}
 .ttl{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;color:var(--a);margin-bottom:4px}
 .sub{font-family:'DM Mono',monospace;font-size:10px;color:var(--m);letter-spacing:2px;text-transform:uppercase;margin-bottom:20px}
@@ -40,12 +39,58 @@ textarea{resize:vertical;min-height:80px}
 .err{background:#fdecea;border:1px solid var(--r);border-radius:8px;padding:14px;margin-bottom:12px;font-size:12px;color:var(--r)}
 .wrn{background:#fff8e1;border:1px solid var(--g);border-radius:8px;padding:14px;margin-bottom:12px;font-size:12px;color:#7a5f00}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-@media(max-width:480px){.g2{grid-template-columns:1fr}}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media(max-width:480px){.g2,.g3{grid-template-columns:1fr}}
+.lbl{font-family:'DM Mono',monospace;font-size:9px;color:var(--g);text-transform:uppercase;letter-spacing:2px;margin-bottom:10px}
+
+/* DASHBOARD STYLES */
+.metric-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+@media(max-width:600px){.metric-grid{grid-template-columns:repeat(2,1fr)}}
+.metric{background:var(--s);border:1px solid var(--b);border-radius:10px;padding:16px;text-align:center;position:relative;overflow:hidden}
+.metric::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--g)}
+.metric-val{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:700;color:var(--a);line-height:1}
+.metric-lbl{font-size:10px;color:var(--m);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:1px;margin-top:6px}
+.metric-sub{font-size:11px;color:var(--gr);font-family:'DM Mono',monospace;margin-top:3px}
+.metric.gold::before{background:var(--g)}
+.metric.green::before{background:var(--gr)}
+.metric.red::before{background:var(--r)}
+
+.score-bar{background:var(--s2);border-radius:20px;height:12px;margin:8px 0;overflow:hidden}
+.score-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,var(--r),var(--g),var(--gr));transition:width 1s ease}
+
+.post-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+@media(max-width:500px){.post-grid{grid-template-columns:repeat(2,1fr)}}
+.post-card{background:var(--s);border:1px solid var(--b);border-radius:8px;padding:12px;position:relative;cursor:pointer;transition:all .2s}
+.post-card:hover{border-color:var(--g);transform:translateY(-2px)}
+.post-card.best{border-color:var(--gr);background:#f0fff4}
+.post-best-badge{position:absolute;top:8px;right:8px;background:var(--gr);color:#fff;font-size:8px;padding:2px 6px;border-radius:3px;font-family:'DM Mono',monospace}
+.post-type{font-size:9px;color:var(--m);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.post-cap{font-size:11px;font-weight:500;color:var(--a);line-height:1.4;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.post-stats{display:flex;gap:8px;font-size:10px;color:var(--m);font-family:'DM Mono',monospace}
+.post-date{font-size:9px;color:var(--m);margin-top:5px;font-family:'DM Mono',monospace}
+
+.score-ring{display:flex;align-items:center;gap:20px;margin-bottom:16px}
+.ring{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;flex-shrink:0}
+.ring-good{background:#e8f5e9;color:var(--gr);border:3px solid var(--gr)}
+.ring-mid{background:#fff8e1;color:#a07830;border:3px solid var(--g)}
+.ring-bad{background:#fdecea;color:var(--r);border:3px solid var(--r)}
+
+.insight-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--b)}
+.insight-row:last-child{border-bottom:none}
+.insight-icon{font-size:18px;flex-shrink:0;margin-top:2px}
+.insight-text{font-size:12px;line-height:1.6;color:var(--t)}
+.insight-title{font-weight:600;color:var(--a);margin-bottom:2px}
+
+.sf{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px}
+.sb{padding:5px 10px;border-radius:4px;border:1px solid var(--b);background:transparent;color:var(--m);font-size:11px;cursor:pointer;transition:all .2s}
+.sb.active,.sb:hover{background:var(--a);color:var(--g);border-color:var(--a)}
+
 .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
 @media(min-width:580px){.stats{grid-template-columns:repeat(4,1fr)}}
 .stat{background:var(--s);border:1px solid var(--b);border-radius:8px;padding:14px;text-align:center}
 .stn{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:700;color:var(--a)}
 .stl{font-size:9px;color:var(--m);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:1px;margin-top:3px}
+
 .idea{background:var(--s);border:1px solid var(--b);border-left:4px solid var(--g);border-radius:0 8px 8px 0;padding:14px 16px;margin-bottom:10px}
 .idea-s{font-family:'DM Mono',monospace;font-size:9px;color:var(--g);text-transform:uppercase;letter-spacing:2px;margin-bottom:5px}
 .idea-t{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--a);margin-bottom:5px}
@@ -55,13 +100,8 @@ textarea{resize:vertical;min-height:80px}
 .tag-g{border-color:var(--g);color:#a07830}
 .tag-a{cursor:pointer;border-color:var(--a);color:var(--a);background:transparent;transition:all .2s}
 .tag-a:hover{background:var(--a);color:#fff}
-.sf{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px}
-.sb{padding:5px 10px;border-radius:4px;border:1px solid var(--b);background:transparent;color:var(--m);font-size:11px;cursor:pointer;transition:all .2s}
-.sb.active,.sb:hover{background:var(--a);color:var(--g);border-color:var(--a)}
-.post{background:var(--s);border:1px solid var(--b);border-radius:8px;padding:12px;margin-bottom:8px}
-.post-c{font-size:12px;font-weight:500;margin-bottom:5px;line-height:1.4}
-.post-s{display:flex;gap:10px;font-size:10px;color:var(--m);font-family:'DM Mono',monospace}
-.lbl{font-family:'DM Mono',monospace;font-size:9px;color:var(--g);text-transform:uppercase;letter-spacing:2px;margin-bottom:10px}
+
+.post-card-rival{background:var(--s);border:1px solid var(--b);border-radius:8px;padding:12px;margin-bottom:8px}
 .apify-box{background:#e8f5e9;border:1px solid #a5d6a7;border-radius:6px;padding:10px 13px;margin-bottom:12px;font-family:'DM Mono',monospace;font-size:10px;color:#1a4a2a;line-height:1.8}
 .apify-badge{display:inline-block;background:#2d7a4a;color:#fff;font-size:9px;padding:2px 7px;border-radius:3px;font-family:'DM Mono',monospace;letter-spacing:1px;margin-bottom:6px}
 @media(max-width:580px){.main{padding:14px}}
@@ -72,7 +112,7 @@ textarea{resize:vertical;min-height:80px}
 <div class="hdr">
   <div>
     <div class="logo">WİSREM AI</div>
-    <div class="logo-s">@ugurcaglar.wisrem · v4.1</div>
+    <div class="logo-s">@ugurcaglar.wisrem · v5.0</div>
   </div>
   <div id="bdg" class="bdg off">BAĞLI DEĞİL</div>
 </div>
@@ -117,9 +157,11 @@ textarea{resize:vertical;min-height:80px}
 <!-- DASHBOARD -->
 <div class="pnl" id="pnl-dash">
   <div class="ttl">Canlı Dashboard</div>
-  <div class="sub">// GERÇEK VERİ — @ugurcaglar.wisrem</div>
-  <button class="btn btn-d" onclick="loadDashboard()" id="btn-refresh" style="margin-bottom:16px">🔄 Verileri Yenile</button>
-  <div id="dash-out"><div class="wrn">Bağlandıktan sonra "Verileri Yenile" tıkla.</div></div>
+  <div class="sub">// @UGURCAGLAR.WISREM · GERÇEK VERİ</div>
+  <button class="btn btn-d" onclick="loadDashboard()" id="btn-dash" style="margin-bottom:20px">🔄 Verileri Yenile</button>
+  <div id="dash-out">
+    <div class="wrn">📊 "Verileri Yenile" tıkla — Apify ile profil verisi + AI analizi yüklenecek. ~30 saniye sürer.</div>
+  </div>
 </div>
 
 <!-- FİKİRLER -->
@@ -239,16 +281,12 @@ textarea{resize:vertical;min-height:80px}
 let TOK='', IGID='17841464135271994', SER='all';
 const rivals=[];
 
-// ── AI: /api/ai üzerinden (CORS sorunu yok) ──────────
+// ── AI ───────────────────────────────────────────────
 async function ai(prompt){
-  const r=await fetch('/api/ai',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({prompt})
-  });
+  const r=await fetch('/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});
   const d=await r.json();
   if(d.error) throw new Error(d.error);
-  return d.result||d.content||'';
+  return d.result||'';
 }
 
 // ── Instagram Graph API ───────────────────────────────
@@ -258,6 +296,15 @@ async function ig(ep){
   return r.json();
 }
 
+// ── Apify ────────────────────────────────────────────
+async function apify(type,target){
+  const r=await fetch(`/api/instagram?action=apify&type=${type}&target=${encodeURIComponent(target)}`);
+  const raw=await r.json();
+  if(Array.isArray(raw)&&raw.length>0) return raw[0];
+  if(raw&&typeof raw==='object'&&!raw.error) return raw;
+  return null;
+}
+
 // ── NAV ──────────────────────────────────────────────
 function go(id,btn){
   document.querySelectorAll('.pnl').forEach(p=>p.classList.remove('active'));
@@ -265,15 +312,12 @@ function go(id,btn){
   document.getElementById('pnl-'+id).classList.add('active');
   btn.classList.add('active');
 }
-
 function setSer(btn,v){
-  document.querySelectorAll('.sb').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  SER=v;
+  document.querySelectorAll('.sf .sb').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); SER=v;
 }
-
-function ld(id){
-  document.getElementById(id).innerHTML='<div class="ld"><div class="sp"></div>Yükleniyor...</div>';
+function ld(id,msg){
+  document.getElementById(id).innerHTML=`<div class="ld"><div class="sp"></div>${msg||'Yükleniyor...'}</div>`;
 }
 
 // ── BAĞLANTI ─────────────────────────────────────────
@@ -288,50 +332,164 @@ async function doConnect(){
   try{
     const me=await ig('me?fields=id,name');
     if(me.error) throw new Error(me.error.message);
-    let igTxt='';
-    try{
-      const d=await ig(`${IGID}?fields=username,followers_count,media_count`);
-      if(!d.error) igTxt=`<br>📸 @${d.username||'ugurcaglar.wisrem'} · 👥 ${d.followers_count?d.followers_count.toLocaleString():'16.400+'} takipçi · 🎬 ${d.media_count||'53'} gönderi`;
-    }catch(e){}
     document.getElementById('bdg').className='bdg on';
     document.getElementById('bdg').textContent='✓ BAĞLI';
-    document.getElementById('conn-res').innerHTML=`<div class="ok">✅ Bağlantı başarılı! ${me.name}${igTxt}<br><br><button class="btn btn-d" onclick="loadDashboard();go('dash',document.querySelectorAll('.tab')[1])">→ Dashboard'a Git</button></div>`;
+    document.getElementById('conn-res').innerHTML=`<div class="ok">✅ Bağlantı başarılı! ${me.name}<br><br><button class="btn btn-d" onclick="loadDashboard();go('dash',document.querySelectorAll('.tab')[1])">→ Dashboard'a Git</button></div>`;
   }catch(e){
     TOK='';
     document.getElementById('bdg').className='bdg off';
     document.getElementById('bdg').textContent='BAĞLI DEĞİL';
-    document.getElementById('conn-res').innerHTML=`<div class="err">❌ ${e.message}<br>Token geçersiz veya süresi dolmuş.</div>`;
+    document.getElementById('conn-res').innerHTML=`<div class="err">❌ ${e.message}</div>`;
   }
   btn.disabled=false;
 }
 
-// ── DASHBOARD ────────────────────────────────────────
+// ── DASHBOARD ─────────────────────────────────────────
 async function loadDashboard(){
-  if(!TOK){alert('Önce bağlan!');return;}
-  const btn=document.getElementById('btn-refresh');
+  const btn=document.getElementById('btn-dash');
   btn.disabled=true; btn.textContent='⏳ Yükleniyor...';
-  ld('dash-out');
+  const out=document.getElementById('dash-out');
+  out.innerHTML='<div class="ld"><div class="sp"></div>Apify ile profil çekiliyor... (~30 sn)</div>';
+
   try{
-    const d=await ig(`${IGID}?fields=username,followers_count,media_count`);
-    let html=`<div class="stats">
-      <div class="stat"><div class="stn">${d.followers_count?d.followers_count.toLocaleString():'16.4K'}</div><div class="stl">Takipçi</div></div>
-      <div class="stat"><div class="stn">${d.media_count||'53'}</div><div class="stl">Gönderi</div></div>
-      <div class="stat"><div class="stn">-</div><div class="stl">Bu Hafta İzlenme</div></div>
-      <div class="stat"><div class="stn">-</div><div class="stl">Etkileşim</div></div>
-    </div>`;
-    try{
-      const m=await ig(`${IGID}/media?fields=id,caption,media_type,timestamp,like_count,comments_count&limit=6`);
-      if(m.data&&m.data.length){
-        html+=`<div style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--a);margin-bottom:10px">Son Paylaşımlar</div>`;
-        m.data.forEach(p=>{
-          const cap=p.caption?p.caption.substring(0,65)+'...':'(başlık yok)';
-          const dt=new Date(p.timestamp).toLocaleDateString('tr-TR');
-          html+=`<div class="post"><div class="post-c">${cap}</div><div class="post-s"><span>❤️ ${p.like_count||0}</span><span>💬 ${p.comments_count||0}</span><span>📅 ${dt}</span><span>${p.media_type}</span></div></div>`;
-        });
-      }
-    }catch(e){html+=`<div class="wrn">Medya çekilemedi: ${e.message}</div>`;}
-    document.getElementById('dash-out').innerHTML=html;
-  }catch(e){document.getElementById('dash-out').innerHTML=`<div class="err">Veri çekilemedi: ${e.message}</div>`;}
+    // 1. Apify ile profil çek
+    const profile=await apify('competitor','ugurcaglar.wisrem');
+
+    if(!profile){
+      out.innerHTML='<div class="err">❌ Profil verisi çekilemedi.</div>';
+      btn.disabled=false; btn.textContent='🔄 Verileri Yenile';
+      return;
+    }
+
+    const followers=Number(profile.followersCount||0);
+    const following=Number(profile.followsCount||0);
+    const posts=Number(profile.postsCount||0);
+    const verified=profile.verified?'✓ Doğrulanmış':'—';
+    const bio=profile.biography||'';
+    const engRate=posts>0?((profile.avgLikes||0)/followers*100).toFixed(2):0;
+
+    // 2. Son gönderileri çek (varsa)
+    const latestPosts=profile.latestPosts||[];
+
+    // 3. Algoritma skoru hesapla (veriye dayalı)
+    let score=50;
+    if(followers>10000) score+=10;
+    if(posts>40) score+=10;
+    if(verified==='✓ Doğrulanmış') score+=10;
+    if(engRate>1) score+=10;
+    if(engRate>3) score+=5;
+    if(bio.length>50) score+=5;
+    score=Math.min(score,100);
+
+    const scoreClass=score>=70?'ring-good':score>=40?'ring-mid':'ring-bad';
+    const scoreColor=score>=70?'var(--gr)':score>=40?'var(--g)':'var(--r)';
+
+    // 4. AI keşfet analizi
+    out.innerHTML='<div class="ld"><div class="sp"></div>AI keşfet analizi yapılıyor...</div>';
+
+    const aiPrompt=
+      `Instagram hesabı analizi yap. @ugurcaglar.wisrem (Wisrem Gayrimenkul Broker)\n`+
+      `Veriler: ${followers.toLocaleString('tr')} takipçi, ${posts} gönderi, Doğrulanmış: ${verified}\n`+
+      `Biyografi: ${bio}\n`+
+      `Tahmini etkileşim oranı: %${engRate}\n\n`+
+      `Şunları analiz et:\n`+
+      `1) KEŞFETTEKİ DURUM: Bu hesap keşfete ne kadar düşüyor olabilir ve neden?\n`+
+      `2) ALGORİTMA SAĞLIĞI: Güçlü ve zayıf yönler\n`+
+      `3) EN İYİ YAYIN SAATİ: Gayrimenkul nişi için Türkiye'de önerilen saatler\n`+
+      `4) HASHTAG STRATEJİSİ: 16K takipçi için ideal hashtag büyüklüğü ve strateji\n`+
+      `5) BÜYÜME ÖNERİLERİ: Organik büyüme için 3 somut öneri\n`+
+      `Türkçe, profesyonel, veriye dayalı cevap ver.`;
+
+    const aiResult=await ai(aiPrompt);
+
+    // 5. Son gönderiler HTML
+    let postsHTML='';
+    if(latestPosts&&latestPosts.length>0){
+      const sorted=[...latestPosts].sort((a,b)=>(b.likesCount||0)-(a.likesCount||0));
+      const bestId=sorted[0]?.id;
+      postsHTML=`
+        <div class="card">
+          <div class="lbl">📸 Son Gönderiler</div>
+          <div class="post-grid">
+            ${latestPosts.slice(0,9).map(p=>{
+              const isBest=p.id===bestId;
+              const cap=(p.caption||'').substring(0,60);
+              const dt=p.timestamp?new Date(p.timestamp).toLocaleDateString('tr-TR'):'';
+              return `<div class="post-card ${isBest?'best':''}">
+                ${isBest?'<span class="post-best-badge">EN İYİ</span>':''}
+                <div class="post-type">${p.type||'POST'}</div>
+                <div class="post-cap">${cap||'(başlık yok)'}</div>
+                <div class="post-stats">
+                  <span>❤️${p.likesCount||0}</span>
+                  <span>💬${p.commentsCount||0}</span>
+                </div>
+                <div class="post-date">${dt}</div>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>`;
+    }
+
+    // 6. Render
+    out.innerHTML=`
+      <!-- METRİKLER -->
+      <div class="metric-grid">
+        <div class="metric gold">
+          <div class="metric-val">${followers>=1000?(followers/1000).toFixed(1)+'K':followers}</div>
+          <div class="metric-lbl">Takipçi</div>
+          <div class="metric-sub">@ugurcaglar.wisrem</div>
+        </div>
+        <div class="metric">
+          <div class="metric-val">${posts}</div>
+          <div class="metric-lbl">Gönderi</div>
+          <div class="metric-sub">${verified}</div>
+        </div>
+        <div class="metric">
+          <div class="metric-val">${following.toLocaleString('tr')}</div>
+          <div class="metric-lbl">Takip Edilen</div>
+          <div class="metric-sub">Oran: 1/${Math.round(followers/(following||1))}</div>
+        </div>
+      </div>
+
+      <!-- BİYO -->
+      ${bio?`<div class="card" style="border-left:4px solid var(--g)">
+        <div class="lbl">Biyografi</div>
+        <div style="font-size:13px;line-height:1.7;color:var(--t)">${bio}</div>
+      </div>`:''}
+
+      <!-- ALGORİTMA SKORU -->
+      <div class="card">
+        <div class="lbl">🤖 Algoritma Sağlık Skoru</div>
+        <div class="score-ring">
+          <div class="ring ${scoreClass}">${score}</div>
+          <div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--a);margin-bottom:4px">
+              ${score>=70?'Güçlü Hesap':score>=40?'Geliştirilmeli':'Kritik Durum'}
+            </div>
+            <div style="font-size:12px;color:var(--m);line-height:1.6">
+              ${followers.toLocaleString('tr')} takipçi · ${posts} gönderi · %${engRate} etkileşim tahmini
+            </div>
+            <div class="score-bar" style="margin-top:10px">
+              <div class="score-fill" style="width:${score}%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SON GÖNDERİLER -->
+      ${postsHTML}
+
+      <!-- AI KEŞFet ANALİZİ -->
+      <div class="card" style="border-left:4px solid var(--a)">
+        <div class="lbl">🔍 AI Keşfet & Algoritma Analizi</div>
+        <div class="res">${aiResult.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div>
+      </div>
+    `;
+
+  }catch(e){
+    out.innerHTML=`<div class="err">❌ Hata: ${e.message}</div>`;
+  }
+
   btn.disabled=false; btn.textContent='🔄 Verileri Yenile';
 }
 
@@ -429,89 +587,35 @@ async function addPerf(){
   btn.disabled=false;
 }
 
-// ── RAKİP ANALİZİ (DÜZELTİLMİŞ) ────────────────────
+// ── RAKİP ────────────────────────────────────────────
 async function doRival(){
   const h=document.getElementById('r-h').value.trim().replace('@','');
   const c=document.getElementById('r-c').value;
   if(!h){alert('Hesap adı gir!');return;}
-
   const btn=document.getElementById('btn-rival');
   const out=document.getElementById('rival-out');
   btn.disabled=true;
   out.innerHTML='<div class="ld"><div class="sp"></div>Apify ile gerçek veri çekiliyor...</div>';
-
-  // Listeye ekle
   if(!rivals.find(r=>r.h===h)){
     rivals.push({h,c});
     document.getElementById('rival-list').innerHTML=rivals.map(r=>
       `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 13px;background:var(--s);border:1px solid var(--b);border-radius:6px;margin-top:8px">
         <div><div style="font-weight:600;font-size:13px">@${r.h}</div><div style="font-size:11px;color:var(--m)">${r.c}</div></div>
         <span class="tag tag-g">TAKİPTE</span>
-      </div>`
-    ).join('');
+      </div>`).join('');
   }
-
-  let apifyInfo='';
-  let hasRealData=false;
-
-  // Apify'dan gerçek veri çek
+  let apifyInfo=''; let hasRealData=false;
   try{
-    const apifyRes=await fetch(`/api/instagram?action=apify&type=competitor&target=${encodeURIComponent(h)}`);
-    const raw=await apifyRes.json();
-
-    // Hem array hem obje formatını handle et
-    let item=null;
-    if(Array.isArray(raw)&&raw.length>0){
-      item=raw[0];
-    } else if(raw&&typeof raw==='object'&&!raw.error&&(raw.username||raw.followersCount!==undefined)){
-      item=raw;
-    }
-
-    if(item){
+    const item=await apify('competitor',h);
+    if(item&&(item.username||item.followersCount!==undefined)){
       hasRealData=true;
-      apifyInfo=
-        `GERÇEK VERİ (Apify Instagram Scraper):\n`+
-        `Kullanıcı: @${item.username||h}\n`+
-        `Takipçi: ${Number(item.followersCount||0).toLocaleString('tr-TR')}\n`+
-        `Takip edilen: ${Number(item.followsCount||0).toLocaleString('tr-TR')}\n`+
-        `Gönderi sayısı: ${item.postsCount||0}\n`+
-        `Biyografi: ${item.biography||'-'}\n`+
-        `Doğrulanmış hesap: ${item.verified?'Evet':'Hayır'}\n`+
-        `Kategori: ${item.businessCategoryName||'-'}\n`+
-        `Full name: ${item.fullName||'-'}`;
-      out.innerHTML='<div class="ld"><div class="sp"></div>Gerçek veri alındı, AI analiz yapılıyor...</div>';
+      apifyInfo=`GERÇEK VERİ (Apify):\nKullanıcı: @${item.username||h}\nTakipçi: ${Number(item.followersCount||0).toLocaleString('tr-TR')}\nTakip: ${Number(item.followsCount||0).toLocaleString('tr-TR')}\nGönderi: ${item.postsCount||0}\nBiyografi: ${item.biography||'-'}\nDoğrulanmış: ${item.verified?'Evet':'Hayır'}\nKategori: ${item.businessCategoryName||'-'}`;
     }
-  }catch(apifyErr){
-    // Apify başarısız — AI ile devam
-  }
-
-  // AI analizi
+  }catch(e){}
   try{
-    const prompt=
-      `Sen @ugurcaglar.wisrem için gayrimenkul içerik stratejistisisin. Uğur Çağlar, Wisrem Broker, 16.400+ takipçi, Türkiye/Kıbrıs/Dubai.\n\n`+
-      `Rakip hesap analizi yap: @${h} (${c})\n`+
-      (apifyInfo?apifyInfo+'\n\n':'Gerçek veri alınamadı, genel gayrimenkul sektörü bilginle analiz et.\n\n')+
-      `Şunları yanıtla:\n`+
-      `1) Bu hesabın içerik stratejisi ve güçlü yönleri neler?\n`+
-      `2) En viral içerik formatları neler, neden tutuyor?\n`+
-      `3) Wisrem bu hesaptan ne öğrenmeli?\n`+
-      `4) Wisrem'in bu hesaba karşı avantajları neler? (Kıbrıs/Dubai/16.4K takipçi)\n`+
-      `5) Farklılaşmak için 3 somut öneri.\n`+
-      `Türkçe, profesyonel, gerçekçi ve savunulabilir cevap ver.`;
-
-    const txt=await ai(prompt);
-
-    out.innerHTML=
-      (hasRealData
-        ? `<div class="apify-box"><span class="apify-badge">● GERÇEK VERİ</span><br>${apifyInfo.replace(/\n/g,'<br>')}</div>`
-        : `<div class="wrn" style="font-size:11px;margin-bottom:10px">⚠️ Apify veri bulamadı — AI kendi bilgisiyle analiz etti.</div>`
-      )+
-      `<div class="card"><div class="lbl">👁 @${h} Analizi</div><div class="res">${txt.replace(/\n/g,'<br>')}</div></div>`;
-
-  }catch(e){
-    out.innerHTML=`<div class="err">❌ Hata: ${e.message}</div>`;
-  }
-
+    const txt=await ai(`Gayrimenkul Instagram rakip analizi. @${h} (${c})\n${apifyInfo||'Genel bilginle analiz et.'}\n1)İçerik stratejisi? 2)Viral formatlar? 3)Wisrem ne öğrenmeli? 4)Wisrem avantajları? 5)3 farklılaşma önerisi. Türkçe.`);
+    out.innerHTML=(hasRealData?`<div class="apify-box"><span class="apify-badge">● GERÇEK VERİ</span><br>${apifyInfo.replace(/\n/g,'<br>')}</div>`:`<div class="wrn">⚠️ Apify veri bulamadı — AI analiz etti.</div>`)+`<div class="card"><div class="lbl">👁 @${h} Analizi</div><div class="res">${txt.replace(/\n/g,'<br>')}</div></div>`;
+  }catch(e){out.innerHTML=`<div class="err">❌ ${e.message}</div>`;}
   btn.disabled=false;
 }
 
@@ -524,7 +628,7 @@ async function doBoost(){
   const btn=document.getElementById('btn-boost');
   btn.disabled=true; ld('boost-out');
   try{
-    const txt=await ai(`Wisrem (16.4K takipçi) Instagram reklam stratejisi.\nVideolar:\n${list}\nBütçe: ${bud||'?'}₺, Hedef: ${goal}.\n1)Öncelik sırası 2)Bütçe dağılımı 3)Meta Ads hedef kitle 4)Boost süresi 5)Organik+ücretli kombinasyon. Gerçekçi ROI. Türkçe.`);
+    const txt=await ai(`Wisrem (16.4K takipçi) Instagram reklam stratejisi.\nVideolar:\n${list}\nBütçe: ${bud||'?'}₺, Hedef: ${goal}.\n1)Öncelik 2)Bütçe dağılımı 3)Meta Ads hedef kitle 4)Süre 5)Beklenen ROI. Türkçe.`);
     document.getElementById('boost-out').innerHTML=`<div class="card"><div class="lbl">🚀 Boost Planı</div><div class="res">${txt.replace(/\n/g,'<br>')}</div></div>`;
   }catch(e){document.getElementById('boost-out').innerHTML=`<div class="err">${e.message}</div>`;}
   btn.disabled=false;
