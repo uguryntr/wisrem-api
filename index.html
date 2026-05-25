@@ -390,7 +390,8 @@ async function ai(prompt){
 
 // ── Instagram Graph API ───────────────────────────────
 async function ig(ep){
-  const r=await fetch(`/api/instagram?endpoint=${encodeURIComponent(ep)}&token=${encodeURIComponent(TOK)}`);
+  const tokenParam = TOK ? `&token=${encodeURIComponent(TOK)}` : '';
+  const r=await fetch(`/api/instagram?endpoint=${encodeURIComponent(ep)}${tokenParam}`);
   if(!r.ok) throw new Error('API hatası: '+r.status);
   return r.json();
 }
@@ -448,7 +449,7 @@ async function loadDashboard(){
   const btn=document.getElementById('btn-dash');
   btn.disabled=true; btn.textContent='⏳ Yükleniyor...';
   const out=document.getElementById('dash-out');
-  out.innerHTML='<div class="ld"><div class="sp"></div>Apify ile profil çekiliyor... (~30 sn)</div>';
+  out.innerHTML='<div class="ld"><div class="sp"></div>Profil verisi çekiliyor... (~30 sn)</div>';
 
   try{
     // 1. Apify ile profil çek
