@@ -623,7 +623,7 @@ async function loadDashboard(){
 }
 
 // ── GÖREV TOGGLE ─────────────────────────────────────
-function toggleTask(i){
+async function toggleTask(i){
   const box=document.getElementById('task-box-'+i);
   const text=document.getElementById('task-text-'+i);
   const tasks=await MEM.getTasks();
