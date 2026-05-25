@@ -292,7 +292,12 @@ const MEM={
     try{
       const r=await fetch(`/api/memory?action=get&key=${key}`);
       const d=await r.json();
-      return d.value;
+      let val = d.value;
+      // Upstash bazen array içinde string döndürüyor, tekrar parse et
+      if(Array.isArray(val) && val.length===1 && typeof val[0]==='string'){
+        try{ val = JSON.parse(val[0]); }catch(e){}
+      }
+      return val;
     }catch(e){ return null; }
   },
 
