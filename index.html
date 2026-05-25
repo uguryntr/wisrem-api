@@ -610,10 +610,10 @@ async function loadDashboard(){
     // Sohbet geçmişini yükle
     setTimeout(()=>renderChatHistory(),200);
 
-    // Hesap verisini global + localStorage'a kaydet
-    const ctxStr = `@ugurcaglar.wisrem: ${followers.toLocaleString('tr')} takipçi, ${posts} gönderi, Doğrulanmış: ${verified}, Bio: ${bio}, Etkileşim: %${engRate}`;
+    // Hesap verisini global + Upstash'e kaydet
+    const ctxStr = `@ugurcaglar.wisrem: ${followers.toLocaleString('tr')} takipçi, ${posts} gönderi, Doğrulanmış: ${verified}, Bio: ${bio||'-'}, Etkileşim: %${engRate}`;
     window._dashContext = ctxStr;
-    await MEM.saveProfile({summary: ctxStr, followers, posts, verified, bio, engRate});
+    await MEM.saveProfile({summary: ctxStr, followers: followers, posts: posts, verified: verified, bio: bio||'-', engRate: engRate, savedAt: new Date().toLocaleString('tr-TR')});
 
   }catch(e){
     out.innerHTML=`<div class="err">❌ Hata: ${e.message}</div>`;
@@ -654,10 +654,11 @@ async function loadCachedDash(){
   const out=document.getElementById('dash-out');
   if(!p){ out.innerHTML='<div class="wrn">Henüz kayıtlı analiz yok. "Verileri Yenile" tıkla.</div>'; return; }
   const ch=await MEM.getChat();
+  const summary = p.summary || p.bio || 'Profil verisi';
   out.innerHTML=`
     <div class="card" style="border-left:4px solid var(--g)">
-      <div class="lbl">💾 Kaydedilmiş Analiz — ${p.savedAt}</div>
-      <div style="font-size:13px;line-height:1.8;color:var(--t)">${p.summary}</div>
+      <div class="lbl">💾 Kaydedilmiş Analiz — ${p.savedAt||'Bilinmiyor'}</div>
+      <div style="font-size:13px;line-height:1.8;color:var(--t)">${summary}</div>
     </div>
     <div class="card" style="border-left:4px solid var(--gr)">
       <div class="lbl">💬 Sohbet Geçmişi (${ch.length} mesaj)</div>
