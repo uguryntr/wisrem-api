@@ -358,6 +358,23 @@ const MEM={
   }
 };
 
+// ── SAYFA AÇILINCA OTOMATİK YÜKLE ───────────────────
+window.addEventListener('load', async()=>{
+  // Dashboard'a geçilince otomatik yükle
+  const dashTab = document.querySelectorAll('.tab')[1];
+  if(dashTab){
+    dashTab.addEventListener('click', async()=>{
+      // Kısa gecikme sonra cached'i yükle
+      setTimeout(async()=>{
+        const out = document.getElementById('dash-out');
+        if(out && out.innerHTML.includes('Verileri Yenile')){
+          await loadCachedDash();
+        }
+      }, 100);
+    });
+  }
+});
+
 // ── AI ───────────────────────────────────────────────
 async function ai(prompt){
   const r=await fetch('/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});
@@ -709,10 +726,10 @@ async function askDash(){
 
     const prompt=
       `Sen Uğur Çağlar'ın (@ugurcaglar.wisrem) kişisel Instagram ve gayrimenkul asistanısın.\n`+
-      `Aşağıdaki tüm geçmiş konuşmaları ve profil verisini biliyorsun, dikkate alarak cevap ver:\n\n`+
-      `${fullContext}\n\n`+
+      `Wisrem Gayrimenkul Broker. Türkiye, Kıbrıs, Dubai pazarlarında çalışıyor.\n`+
+      (fullContext ? `Bilinen bilgiler:\n${fullContext}\n\n` : '')+
       `Şu anki soru: ${q}\n\n`+
-      `Önceki konuşmaları hatırla ve tutarlı devam et. Kısa, net, uygulanabilir. Türkçe.`;
+      `Eğer geçmiş konuşma varsa ona göre devam et. Yoksa genel gayrimenkul danışmanı olarak yardım et. Kısa, net, uygulanabilir. Türkçe.`;
 
     const txt=await ai(prompt);
 
