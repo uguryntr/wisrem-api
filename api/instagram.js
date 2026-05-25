@@ -1,4 +1,3 @@
-
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -24,7 +23,6 @@ export default async function handler(req, res) {
         input = { hashtags: [target], resultsLimit: 20 };
       }
 
-      // Start the actor run
       const startRes = await fetch(`https://api.apify.com/v2/acts/${actor}/runs`, {
         method: 'POST',
         headers: {
@@ -39,7 +37,6 @@ export default async function handler(req, res) {
 
       if (!runId) return res.status(500).json({ error: 'Run başlatılamadı', details: startData });
 
-      // Wait for run to finish (poll)
       let status = 'RUNNING';
       let attempts = 0;
       while (status === 'RUNNING' && attempts < 30) {
@@ -52,7 +49,6 @@ export default async function handler(req, res) {
         attempts++;
       }
 
-      // Get dataset items
       const datasetId = (await (await fetch(`https://api.apify.com/v2/actor-runs/${runId}`, {
         headers: { 'Authorization': `Bearer ${APIFY_TOKEN}` }
       })).json()).data?.defaultDatasetId;
@@ -68,13 +64,15 @@ export default async function handler(req, res) {
     }
   }
 
-  // Meta Graph API
-  if (!token || !endpoint) {
+  // Meta Graph API — token yoksa env'den al
+  const finalToken = token || process.env.IG_ACCESS_TOKEN;
+
+  if (!finalToken || !endpoint) {
     return res.status(400).json({ error: 'Token ve endpoint gerekli' });
   }
 
   try {
-    const url = `https://graph.facebook.com/v19.0/${endpoint}&access_token=${token}`;
+    const url = `https://graph.facebook.com/v19.0/${endpoint}&access_token=${finalToken}`;
     const response = await fetch(url);
     const data = await response.json();
     return res.status(200).json(data);
