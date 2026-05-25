@@ -380,7 +380,7 @@ async function doRival(){
   const c=document.getElementById('r-c').value;
   if(!h){alert('Hesap adı gir!');return;}
   rivals.push({h,c});
-  document.getElementById('rival-list').innerHTML=(rivals||[]).filter(r=>r).map(r=>...
+  document.getElementById('rival-list').innerHTML=(rivals||[]).filter(Boolean).map(r=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 13px;background:var(--s);border:1px solid var(--b);border-radius:6px;margin-top:8px"><div><div style="font-weight:600;font-size:13px">${r.h}</div><div style="font-size:11px;color:var(--m)">${r.c}</div></div><span class="tag tag-g">TAKİPTE</span></div>`).join('');
   const btn=document.getElementById('btn-rival');
   btn.disabled=true;ld('rival-out');
   try{
