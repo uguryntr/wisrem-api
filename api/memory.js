@@ -6,7 +6,6 @@ export default async function handler(req, res) {
 
   const URL = process.env.KV_REST_API_URL;
   const TOKEN = process.env.KV_REST_API_TOKEN;
-
   if (!URL || !TOKEN) return res.status(500).json({ error: 'Upstash config eksik' });
 
   const headers = {
@@ -14,7 +13,14 @@ export default async function handler(req, res) {
     'Content-Type': 'application/json'
   };
 
-  const { action, key, value } = req.method === 'POST' ? req.body : req.query;
+  let body = {};
+  if (req.method === 'POST') {
+    body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body || {};
+  }
+
+  const action = req.method === 'POST' ? body.action : req.query.action;
+  const key = req.method === 'POST' ? body.key : req.query.key;
+  const value = body.value;
 
   try {
     if (action === 'get') {
@@ -34,12 +40,11 @@ export default async function handler(req, res) {
     }
 
     if (action === 'append') {
-      // Mevcut listeyi çek
-      const r = await fetch(`${URL}/get/${key}`, { headers });
-      const d = await r.json();
-      const existing = d.result ? JSON.parse(d.result) : [];
+      const getR = await fetch(`${URL}/get/${key}`, { headers });
+      const getD = await getR.json();
+      const existing = getD.result ? JSON.parse(getD.result) : [];
+      if (!Array.isArray(existing)) return res.status(500).json({ error: 'Not array' });
       existing.push(value);
-      // Max 200 tut
       const trimmed = existing.slice(-200);
       await fetch(`${URL}/set/${key}`, {
         method: 'POST',
@@ -54,7 +59,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true });
     }
 
-    return res.status(400).json({ error: 'action gerekli: get/set/append/delete' });
+    return res.status(400).json({ error: 'Geçersiz action' });
 
   } catch (e) {
     return res.status(500).json({ error: e.message });
