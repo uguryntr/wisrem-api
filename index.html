@@ -158,9 +158,13 @@ textarea{resize:vertical;min-height:80px}
 <div class="pnl" id="pnl-dash">
   <div class="ttl">Canlı Dashboard</div>
   <div class="sub">// @UGURCAGLAR.WISREM · GERÇEK VERİ</div>
-  <button class="btn btn-d" onclick="loadDashboard()" id="btn-dash" style="margin-bottom:20px">🔄 Verileri Yenile</button>
+  <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
+    <button class="btn btn-d" onclick="loadDashboard()" id="btn-dash">🔄 Verileri Yenile</button>
+    <button class="btn" style="background:var(--s2);color:var(--m);border:1px solid var(--b)" onclick="loadCachedDash()">⚡ Kaydedileni Göster</button>
+    <button class="btn" style="background:#fdecea;color:var(--r);border:1px solid var(--r);font-size:11px" onclick="(async()=>{if(confirm('Tüm hafıza silinsin mi?')){await MEM.clear();location.reload()}})()">🗑 Hafızayı Sıfırla</button>
+  </div>
   <div id="dash-out">
-    <div class="wrn">📊 "Verileri Yenile" tıkla — Apify ile profil verisi + AI analizi yüklenecek. ~30 saniye sürer.</div>
+    <div class="wrn">📊 "Verileri Yenile" tıkla — Apify ile profil verisi + AI analizi yüklenecek. ~30 saniye sürer.<br><br>💾 Daha önce analiz yaptıysan "Kaydedileni Göster" ile anında yükle.</div>
   </div>
 </div>
 
@@ -280,6 +284,79 @@ textarea{resize:vertical;min-height:80px}
 <script>
 let TOK='', IGID='17841464135271994', SER='all';
 const rivals=[];
+
+// ── KALICI HAFIZA SİSTEMİ (Upstash Redis) ───────────
+const MEM={
+  // Upstash'den veri çek
+  async get(key){
+    try{
+      const r=await fetch(`/api/memory?action=get&key=${key}`);
+      const d=await r.json();
+      return d.value;
+    }catch(e){ return null; }
+  },
+
+  // Upstash'e veri yaz
+  async set(key,value){
+    try{
+      await fetch('/api/memory',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action:'set',key,value})
+      });
+    }catch(e){}
+  },
+
+  // Upstash'e item ekle
+  async append(key,item){
+    try{
+      await fetch('/api/memory',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action:'append',key,value:item})
+      });
+    }catch(e){}
+  },
+
+  // Upstash'den sil
+  async delete(key){
+    try{
+      await fetch('/api/memory',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action:'delete',key})
+      });
+    }catch(e){}
+  },
+
+  async getChat(){ return await this.get('ugur_chat')||[]; },
+  async addChat(role,content){
+    await this.append('ugur_chat',{role,content,time:new Date().toLocaleString('tr-TR')});
+  },
+  async getTasks(){ return await this.get('ugur_tasks')||[]; },
+  async saveTasks(tasks){ await this.set('ugur_tasks',tasks); },
+  async saveProfile(data){ await this.set('ugur_profile',{...data,savedAt:new Date().toLocaleString('tr-TR')}); },
+  async getProfile(){ return await this.get('ugur_profile'); },
+
+  async getContext(){
+    const p=await this.getProfile();
+    const ch=await this.getChat();
+    const recent=ch.slice(-30);
+    let ctx='';
+    if(p) ctx+=`[Profil - ${p.savedAt}]: ${p.summary}\n\n`;
+    if(recent.length>0) ctx+=`[Sohbet Geçmişi]:\n`+recent.map(m=>`${m.role==='user'?'Uğur':'Asistan'}: ${m.content}`).join('\n');
+    return ctx;
+  },
+
+  async clear(key){
+    if(key) await this.delete(key);
+    else{
+      await this.delete('ugur_chat');
+      await this.delete('ugur_tasks');
+      await this.delete('ugur_profile');
+    }
+  }
+};
 
 // ── AI ───────────────────────────────────────────────
 async function ai(prompt){
@@ -517,17 +594,26 @@ async function loadDashboard(){
 
       <!-- SORU-CEVAP -->
       <div class="card" style="border-left:4px solid var(--gr)">
-        <div class="lbl">💬 Hesabın Hakkında Soru Sor</div>
-        <div id="qa-history" style="margin-bottom:12px"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div class="lbl" style="margin-bottom:0">💬 Kişisel Asistan — Hesabın Hakkında Sor</div>
+          <button onclick="(async()=>{await MEM.clear('ugur_chat');document.getElementById('qa-history').innerHTML='';alert('Sohbet geçmişi silindi.')})()" style="background:none;border:none;font-size:10px;color:var(--m);cursor:pointer;font-family:DM Mono,monospace">🗑 Geçmişi Sil</button>
+        </div>
+        <div id="qa-history" style="max-height:500px;overflow-y:auto;margin-bottom:12px"></div>
         <div style="display:flex;gap:8px">
           <input type="text" id="qa-input" placeholder="Bio'mu nasıl yazmalıyım? / Bu hafta ne paylaşsam?" style="margin-bottom:0;flex:1" onkeydown="if(event.key==='Enter')askDash()">
           <button class="btn btn-d" onclick="askDash()" style="white-space:nowrap;flex-shrink:0">Sor →</button>
         </div>
+        <div style="font-size:9px;color:var(--m);margin-top:8px;font-family:DM Mono,monospace">💾 Tüm konuşmalar tarayıcına kaydediliyor. Sayfa kapanınca bile hatırlıyor.</div>
       </div>
     `;
 
-    // Hesap verisini global'e kaydet (Q&A için)
-    window._dashContext = `@ugurcaglar.wisrem: ${followers.toLocaleString('tr')} takipçi, ${posts} gönderi, Doğrulanmış: ${verified}, Bio: ${bio}, Etkileşim: %${engRate}`;
+    // Sohbet geçmişini yükle
+    setTimeout(()=>renderChatHistory(),200);
+
+    // Hesap verisini global + localStorage'a kaydet
+    const ctxStr = `@ugurcaglar.wisrem: ${followers.toLocaleString('tr')} takipçi, ${posts} gönderi, Doğrulanmış: ${verified}, Bio: ${bio}, Etkileşim: %${engRate}`;
+    window._dashContext = ctxStr;
+    await MEM.saveProfile({summary: ctxStr, followers, posts, verified, bio, engRate});
 
   }catch(e){
     out.innerHTML=`<div class="err">❌ Hata: ${e.message}</div>`;
@@ -540,14 +626,16 @@ async function loadDashboard(){
 function toggleTask(i){
   const box=document.getElementById('task-box-'+i);
   const text=document.getElementById('task-text-'+i);
-  const row=document.getElementById('task-'+i);
-  if(box.innerHTML==='✓'){
+  const tasks=await MEM.getTasks();
+  const isDone=box.innerHTML==='✓';
+  if(isDone){
     box.innerHTML='';
     box.style.background='transparent';
     box.style.borderColor='var(--b)';
-    box.style.color='var(--gr)';
+    box.style.color='';
     text.style.textDecoration='none';
     text.style.color='var(--t)';
+    if(tasks[i]) tasks[i].done=false;
   } else {
     box.innerHTML='✓';
     box.style.background='var(--gr)';
@@ -555,26 +643,87 @@ function toggleTask(i){
     box.style.color='#fff';
     text.style.textDecoration='line-through';
     text.style.color='var(--m)';
+    if(tasks[i]) tasks[i].done=true;
   }
+  await MEM.saveTasks(tasks);
 }
 
-// ── DASHBOARD Q&A ─────────────────────────────────────
+// Kaydedilmiş dashboard'u göster
+async function loadCachedDash(){
+  const p=await MEM.getProfile();
+  const out=document.getElementById('dash-out');
+  if(!p){ out.innerHTML='<div class="wrn">Henüz kayıtlı analiz yok. "Verileri Yenile" tıkla.</div>'; return; }
+  const ch=await MEM.getChat();
+  out.innerHTML=`
+    <div class="card" style="border-left:4px solid var(--g)">
+      <div class="lbl">💾 Kaydedilmiş Analiz — ${p.savedAt}</div>
+      <div style="font-size:13px;line-height:1.8;color:var(--t)">${p.summary}</div>
+    </div>
+    <div class="card" style="border-left:4px solid var(--gr)">
+      <div class="lbl">💬 Sohbet Geçmişi (${ch.length} mesaj)</div>
+      <div id="qa-history" style="max-height:400px;overflow-y:auto;margin-bottom:12px"></div>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="qa-input" placeholder="Sorun nedir? Devam edelim..." style="margin-bottom:0;flex:1" onkeydown="if(event.key==='Enter')askDash()">
+        <button class="btn btn-d" onclick="askDash()" style="white-space:nowrap;flex-shrink:0">Sor →</button>
+      </div>
+    </div>`;
+  renderChatHistory();
+  window._dashContext=p.summary;
+}
+
+// ── DASHBOARD Q&A (KALICI SOHBET) ───────────────────
+async function renderChatHistory(){
+  const hist=document.getElementById('qa-history');
+  if(!hist) return;
+  const msgs=await MEM.getChat();
+  if(msgs.length===0) return;
+  hist.innerHTML=msgs.map(m=>
+    m.role==='user'
+      ? `<div style="background:var(--s2);border-radius:8px 8px 2px 8px;padding:10px 13px;margin-bottom:8px;font-size:12px;color:var(--a);font-weight:500;text-align:right">🙋 ${m.content}<div style="font-size:9px;color:var(--m);margin-top:3px">${m.time||''}</div></div>`
+      : `<div style="background:#e8f5e9;border:1px solid #a5d6a7;border-radius:2px 8px 8px 8px;padding:10px 13px;margin-bottom:12px;font-size:12px;line-height:1.7;color:#1a4a2a">${m.content.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}<div style="font-size:9px;color:#2d7a4a;margin-top:3px">${m.time||''}</div></div>`
+  ).join('');
+  hist.scrollTop=hist.scrollHeight;
+}
+
 async function askDash(){
   const input=document.getElementById('qa-input');
   const q=input.value.trim();
   if(!q) return;
   input.value='';
   const hist=document.getElementById('qa-history');
-  // Soruyu ekle
-  hist.innerHTML+=`<div style="background:var(--s2);border-radius:8px 8px 2px 8px;padding:10px 13px;margin-bottom:8px;font-size:12px;color:var(--a);font-weight:500">🙋 ${q}</div>`;
-  // Yükleniyor
+
+  // Upstash'e kaydet
+  await MEM.addChat('user',q);
+
+  // UI'a ekle
+  hist.innerHTML+=`<div style="background:var(--s2);border-radius:8px 8px 2px 8px;padding:10px 13px;margin-bottom:8px;font-size:12px;color:var(--a);font-weight:500;text-align:right">🙋 ${q}</div>`;
+
   const loadId='qa-load-'+Date.now();
   hist.innerHTML+=`<div id="${loadId}" class="ld" style="padding:8px 0"><div class="sp"></div>Yanıt hazırlanıyor...</div>`;
-  hist.scrollIntoView({behavior:'smooth',block:'end'});
+  hist.scrollTop=hist.scrollHeight;
+
   try{
-    const context=window._dashContext||'@ugurcaglar.wisrem Instagram hesabı';
-    const txt=await ai(`Sen @ugurcaglar.wisrem için Instagram ve gayrimenkul uzmanısın.\nHesap verisi: ${context}\nKullanıcı sorusu: ${q}\nKısa, net, uygulanabilir cevap ver. Türkçe.`);
-    document.getElementById(loadId).outerHTML=`<div style="background:#e8f5e9;border:1px solid #a5d6a7;border-radius:2px 8px 8px 8px;padding:10px 13px;margin-bottom:12px;font-size:12px;line-height:1.7;color:#1a4a2a">${txt.replace(/\n/g,'<br>')}</div>`;
+    // Tüm geçmişi + profil verisini context'e al
+    const fullContext=await MEM.getContext()||window._dashContext||'@ugurcaglar.wisrem Instagram hesabı';
+
+    const prompt=
+      `Sen Uğur Çağlar'ın (@ugurcaglar.wisrem) kişisel Instagram ve gayrimenkul asistanısın.\n`+
+      `Aşağıdaki tüm geçmiş konuşmaları ve profil verisini biliyorsun, dikkate alarak cevap ver:\n\n`+
+      `${fullContext}\n\n`+
+      `Şu anki soru: ${q}\n\n`+
+      `Önceki konuşmaları hatırla ve tutarlı devam et. Kısa, net, uygulanabilir. Türkçe.`;
+
+    const txt=await ai(prompt);
+
+    // Cevabı Upstash'e kaydet
+    await MEM.addChat('assistant',txt);
+
+    document.getElementById(loadId).outerHTML=
+      `<div style="background:#e8f5e9;border:1px solid #a5d6a7;border-radius:2px 8px 8px 8px;padding:10px 13px;margin-bottom:12px;font-size:12px;line-height:1.7;color:#1a4a2a">`+
+      txt.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')+
+      `</div>`;
+
+    hist.scrollTop=hist.scrollHeight;
   }catch(e){
     document.getElementById(loadId).outerHTML=`<div class="err" style="font-size:11px">${e.message}</div>`;
   }
