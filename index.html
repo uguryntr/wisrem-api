@@ -677,10 +677,10 @@ async function renderChatHistory(){
   if(!hist) return;
   const msgs=await MEM.getChat();
   if(msgs.length===0) return;
-  hist.innerHTML=msgs.map(m=>
+  hist.innerHTML=msgs.filter(m=>m&&m.content).map(m=>
     m.role==='user'
-      ? `<div style="background:var(--s2);border-radius:8px 8px 2px 8px;padding:10px 13px;margin-bottom:8px;font-size:12px;color:var(--a);font-weight:500;text-align:right">🙋 ${m.content}<div style="font-size:9px;color:var(--m);margin-top:3px">${m.time||''}</div></div>`
-      : `<div style="background:#e8f5e9;border:1px solid #a5d6a7;border-radius:2px 8px 8px 8px;padding:10px 13px;margin-bottom:12px;font-size:12px;line-height:1.7;color:#1a4a2a">${m.content.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}<div style="font-size:9px;color:#2d7a4a;margin-top:3px">${m.time||''}</div></div>`
+      ? `<div style="background:var(--s2);border-radius:8px 8px 2px 8px;padding:10px 13px;margin-bottom:8px;font-size:12px;color:var(--a);font-weight:500;text-align:right">🙋 ${m.content||''}<div style="font-size:9px;color:var(--m);margin-top:3px">${m.time||''}</div></div>`
+      : `<div style="background:#e8f5e9;border:1px solid #a5d6a7;border-radius:2px 8px 8px 8px;padding:10px 13px;margin-bottom:12px;font-size:12px;line-height:1.7;color:#1a4a2a">${(m.content||'').replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}<div style="font-size:9px;color:#2d7a4a;margin-top:3px">${m.time||''}</div></div>`
   ).join('');
   hist.scrollTop=hist.scrollHeight;
 }
