@@ -6,7 +6,6 @@ export default async function handler(req, res) {
 
   const { endpoint, token, action, type, target } = req.query;
 
-  // Apify scraping
   if (action === 'apify') {
     const APIFY_TOKEN = process.env.APIFY_TOKEN;
     if (!APIFY_TOKEN) return res.status(500).json({ error: 'Apify token yok' });
@@ -25,16 +24,12 @@ export default async function handler(req, res) {
 
       const startRes = await fetch(`https://api.apify.com/v2/acts/${actor}/runs`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${APIFY_TOKEN}`
-        },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${APIFY_TOKEN}` },
         body: JSON.stringify(input)
       });
 
       const startData = await startRes.json();
       const runId = startData.data?.id;
-
       if (!runId) return res.status(500).json({ error: 'Run başlatılamadı', details: startData });
 
       let status = 'RUNNING';
@@ -49,9 +44,11 @@ export default async function handler(req, res) {
         attempts++;
       }
 
-      const datasetId = (await (await fetch(`https://api.apify.com/v2/actor-runs/${runId}`, {
+      const runRes = await fetch(`https://api.apify.com/v2/actor-runs/${runId}`, {
         headers: { 'Authorization': `Bearer ${APIFY_TOKEN}` }
-      })).json()).data?.defaultDatasetId;
+      });
+      const runData = await runRes.json();
+      const datasetId = runData.data?.defaultDatasetId;
 
       const dataRes = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items`, {
         headers: { 'Authorization': `Bearer ${APIFY_TOKEN}` }
