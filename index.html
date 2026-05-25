@@ -398,10 +398,9 @@ async function loadDashboard(){
       `3) EN İYİ YAYIN SAATİ: Gayrimenkul nişi için Türkiye'de önerilen saatler\n`+
       `4) HASHTAG STRATEJİSİ: 16K takipçi için ideal hashtag büyüklüğü ve strateji\n`+
       `5) BÜYÜME ÖNERİLERİ: Organik büyüme için 3 somut öneri\n`+
-      `6) ACİL EYLEM PLANI: Bu hafta yapılması gereken 3 şey (çok spesifik, uygulanabilir)\n`+
+      `6) ACİL EYLEM PLANI: Bu hafta yapılması gereken 5 spesifik görev. Her görevi tam olarak şu formatta yaz:\nGÖREV: [görev açıklaması]\nBu formattan sapma, başka format kullanma.\n`+
       `7) KEŞFET İÇİN HEMEN YAPILACAK: İlk 30 dakika kuralı, hashtag değişikliği, caption uzunluğu gibi somut adımlar\n`+
-
-      `Türkçe, profesyonel, veriye dayalı cevap ver.`;
+      `Türkçe, profesyonel, veriye dayalı, eksiksiz cevap ver.`;
 
     const aiResult=await ai(aiPrompt);
 
@@ -487,13 +486,98 @@ async function loadDashboard(){
         <div class="lbl">🔍 AI Keşfet & Algoritma Analizi</div>
         <div class="res">${aiResult.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div>
       </div>
+
+      <!-- GÖREV KUTUCUĞU -->
+      <div class="card" style="border-left:4px solid var(--g)" id="task-card">
+        <div class="lbl">✅ Bu Hafta Yapılacaklar</div>
+        <div id="task-list">
+          ${(()=>{
+            const tasks=[];
+            const lines=aiResult.split('\n');
+            lines.forEach(l=>{
+              if(l.includes('GÖREV:')) tasks.push(l.replace('GÖREV:','').trim());
+            });
+            if(tasks.length===0){
+              // Fallback: genel görevler
+              tasks.push('Bugün saat 17:30\'da bir Reels paylaş');
+              tasks.push('Bio\'ya hedef kitleye hitap eden bir cümle ekle');
+              tasks.push('Son 5 gönderinin yorumlarına cevap ver');
+              tasks.push('Hashtag setini 30 hashtag olacak şekilde güncelle');
+              tasks.push('Bu hafta günde 1 story paylaş');
+            }
+            return tasks.map((t,i)=>`
+              <div class="task-row" id="task-${i}" onclick="toggleTask(${i})" style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--b);cursor:pointer">
+                <div id="task-box-${i}" style="width:18px;height:18px;border:2px solid var(--b);border-radius:4px;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:11px;transition:.2s"></div>
+                <div id="task-text-${i}" style="font-size:13px;line-height:1.5;color:var(--t)">${t}</div>
+              </div>`).join('');
+          })()}
+        </div>
+        <div style="margin-top:10px;font-size:10px;color:var(--m);font-family:'DM Mono',monospace">Tamamlanan görevler bu oturumda kaydedilir.</div>
+      </div>
+
+      <!-- SORU-CEVAP -->
+      <div class="card" style="border-left:4px solid var(--gr)">
+        <div class="lbl">💬 Hesabın Hakkında Soru Sor</div>
+        <div id="qa-history" style="margin-bottom:12px"></div>
+        <div style="display:flex;gap:8px">
+          <input type="text" id="qa-input" placeholder="Bio'mu nasıl yazmalıyım? / Bu hafta ne paylaşsam?" style="margin-bottom:0;flex:1" onkeydown="if(event.key==='Enter')askDash()">
+          <button class="btn btn-d" onclick="askDash()" style="white-space:nowrap;flex-shrink:0">Sor →</button>
+        </div>
+      </div>
     `;
+
+    // Hesap verisini global'e kaydet (Q&A için)
+    window._dashContext = `@ugurcaglar.wisrem: ${followers.toLocaleString('tr')} takipçi, ${posts} gönderi, Doğrulanmış: ${verified}, Bio: ${bio}, Etkileşim: %${engRate}`;
 
   }catch(e){
     out.innerHTML=`<div class="err">❌ Hata: ${e.message}</div>`;
   }
 
   btn.disabled=false; btn.textContent='🔄 Verileri Yenile';
+}
+
+// ── GÖREV TOGGLE ─────────────────────────────────────
+function toggleTask(i){
+  const box=document.getElementById('task-box-'+i);
+  const text=document.getElementById('task-text-'+i);
+  const row=document.getElementById('task-'+i);
+  if(box.innerHTML==='✓'){
+    box.innerHTML='';
+    box.style.background='transparent';
+    box.style.borderColor='var(--b)';
+    box.style.color='var(--gr)';
+    text.style.textDecoration='none';
+    text.style.color='var(--t)';
+  } else {
+    box.innerHTML='✓';
+    box.style.background='var(--gr)';
+    box.style.borderColor='var(--gr)';
+    box.style.color='#fff';
+    text.style.textDecoration='line-through';
+    text.style.color='var(--m)';
+  }
+}
+
+// ── DASHBOARD Q&A ─────────────────────────────────────
+async function askDash(){
+  const input=document.getElementById('qa-input');
+  const q=input.value.trim();
+  if(!q) return;
+  input.value='';
+  const hist=document.getElementById('qa-history');
+  // Soruyu ekle
+  hist.innerHTML+=`<div style="background:var(--s2);border-radius:8px 8px 2px 8px;padding:10px 13px;margin-bottom:8px;font-size:12px;color:var(--a);font-weight:500">🙋 ${q}</div>`;
+  // Yükleniyor
+  const loadId='qa-load-'+Date.now();
+  hist.innerHTML+=`<div id="${loadId}" class="ld" style="padding:8px 0"><div class="sp"></div>Yanıt hazırlanıyor...</div>`;
+  hist.scrollIntoView({behavior:'smooth',block:'end'});
+  try{
+    const context=window._dashContext||'@ugurcaglar.wisrem Instagram hesabı';
+    const txt=await ai(`Sen @ugurcaglar.wisrem için Instagram ve gayrimenkul uzmanısın.\nHesap verisi: ${context}\nKullanıcı sorusu: ${q}\nKısa, net, uygulanabilir cevap ver. Türkçe.`);
+    document.getElementById(loadId).outerHTML=`<div style="background:#e8f5e9;border:1px solid #a5d6a7;border-radius:2px 8px 8px 8px;padding:10px 13px;margin-bottom:12px;font-size:12px;line-height:1.7;color:#1a4a2a">${txt.replace(/\n/g,'<br>')}</div>`;
+  }catch(e){
+    document.getElementById(loadId).outerHTML=`<div class="err" style="font-size:11px">${e.message}</div>`;
+  }
 }
 
 // ── FİKİRLER ─────────────────────────────────────────
