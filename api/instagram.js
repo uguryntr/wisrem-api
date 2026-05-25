@@ -6,6 +6,7 @@ export default async function handler(req, res) {
 
   const { endpoint, token, action, type, target } = req.query;
 
+  // ── APİFY ────────────────────────────────────────────
   if (action === 'apify') {
     const APIFY_TOKEN = process.env.APIFY_TOKEN;
     if (!APIFY_TOKEN) return res.status(500).json({ error: 'Apify token yok' });
@@ -61,7 +62,7 @@ export default async function handler(req, res) {
     }
   }
 
-  // Meta Graph API — token yoksa env'den al
+  // ── META GRAPH API ────────────────────────────────────
   const finalToken = token || process.env.IG_ACCESS_TOKEN;
 
   if (!finalToken || !endpoint) {
@@ -69,10 +70,16 @@ export default async function handler(req, res) {
   }
 
   try {
-    const url = `https://graph.facebook.com/v19.0/${endpoint}&access_token=${finalToken}`;
+    let fields = '';
+    if (endpoint.includes('media')) {
+      fields = '&fields=id,caption,media_type,timestamp,like_count,comments_count,reach,impressions';
+    }
+
+    const url = `https://graph.facebook.com/v19.0/${endpoint}${fields}&access_token=${finalToken}`;
     const response = await fetch(url);
     const data = await response.json();
     return res.status(200).json(data);
+
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
