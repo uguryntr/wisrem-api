@@ -5,416 +5,556 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Wisrem AI — @ugurcaglar.wisrem</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f7f4ef;--s:#fff;--s2:#f0ece4;--b:#e0d9cc;--a:#1a3a2a;--g:#c9a84c;--t:#1a1a1a;--m:#8a8070;--r:#c0392b;--gr:#2d7a4a}
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t);min-height:100vh}
-.hdr{background:var(--a);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100}
-.logo{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:var(--g);letter-spacing:3px}
-.logo-s{font-family:'DM Mono',monospace;font-size:9px;color:#ffffff40;letter-spacing:2px;margin-top:2px}
-.bdg{font-family:'DM Mono',monospace;font-size:10px;padding:4px 10px;border-radius:4px;letter-spacing:1px}
-.bdg.on{background:var(--g);color:var(--a)}.bdg.off{background:#ffffff20;color:#fff}
-.nav{background:var(--s);border-bottom:2px solid var(--b);display:flex;overflow-x:auto;scrollbar-width:none}
-.nav::-webkit-scrollbar{display:none}
-.tab{padding:12px 16px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--m);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;transition:all .2s;margin-bottom:-2px}
-.tab.active{color:var(--a);border-bottom-color:var(--g);font-weight:600}
-.tab:hover:not(.active){color:var(--a)}
-.main{padding:20px;max-width:860px;margin:0 auto}
-.pnl{display:none}.pnl.active{display:block}
-.ttl{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;color:var(--a);margin-bottom:4px}
-.sub{font-family:'DM Mono',monospace;font-size:10px;color:var(--m);letter-spacing:2px;text-transform:uppercase;margin-bottom:20px}
-.card{background:var(--s);border:1px solid var(--b);border-radius:8px;padding:20px;margin-bottom:14px}
-label{display:block;font-size:10px;color:var(--m);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;font-family:'DM Mono',monospace}
-input,select,textarea{width:100%;background:var(--s2);border:1px solid var(--b);border-radius:6px;padding:10px 13px;color:var(--t);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .2s;margin-bottom:12px}
-input:focus,select:focus,textarea:focus{border-color:var(--g);background:#fff}
+:root{--bg:#0a0a0a;--bg2:#111;--bg3:#1a1a1a;--border:#222;--text:#eee;--text2:#999;--gr:#00c896;--or:#ff6b35;--bl:#4a9eff;--red:#ff4444;--font:'Segoe UI',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh}
+.top{background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:12px}
+.logo{font-size:18px;font-weight:700;color:var(--gr)}
+.handle{font-size:12px;color:var(--text2)}
+.badge{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:11px;color:var(--text2);margin-left:auto}
+.badge.on{border-color:var(--gr);color:var(--gr)}
+nav{background:var(--bg2);border-bottom:1px solid var(--border);display:flex;overflow-x:auto;padding:0 10px}
+nav button{background:none;border:none;color:var(--text2);padding:12px 14px;cursor:pointer;font-size:12px;white-space:nowrap;border-bottom:2px solid transparent;transition:.2s}
+nav button.active{color:var(--gr);border-bottom-color:var(--gr)}
+nav button:hover{color:var(--text)}
+.page{display:none;padding:20px;max-width:700px;margin:0 auto}
+.page.active{display:block}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:14px}
+.card-title{font-size:11px;color:var(--text2);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px}
+label{display:block;font-size:12px;color:var(--text2);margin-bottom:6px}
+input,textarea,select{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px 12px;font-size:13px;outline:none;transition:.2s}
+input:focus,textarea:focus,select:focus{border-color:var(--gr)}
 textarea{resize:vertical;min-height:80px}
-.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:6px;border:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
-.btn-d{background:var(--a);color:var(--g)}.btn-d:hover{background:#0f2a1a}.btn-d:disabled{opacity:.5;cursor:not-allowed}
-.res{background:var(--s2);border:1px solid var(--b);border-radius:8px;padding:16px;font-family:'DM Mono',monospace;font-size:11px;line-height:1.9;color:#444;white-space:pre-wrap;word-break:break-word;margin-top:12px}
-.ld{display:flex;align-items:center;gap:8px;padding:14px;color:var(--m);font-family:'DM Mono',monospace;font-size:11px}
-.sp{width:13px;height:13px;border:2px solid var(--b);border-top-color:var(--g);border-radius:50%;animation:sp .8s linear infinite}
-@keyframes sp{to{transform:rotate(360deg)}}
-.ok{background:#e8f5e9;border:1px solid var(--gr);border-radius:8px;padding:14px;margin-bottom:12px;font-size:12px;color:#1a4a2a}
-.err{background:#fdecea;border:1px solid var(--r);border-radius:8px;padding:14px;margin-bottom:12px;font-size:12px;color:var(--r)}
-.wrn{background:#fff8e1;border:1px solid var(--g);border-radius:8px;padding:14px;margin-bottom:12px;font-size:12px;color:#7a5f00}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-@media(max-width:480px){.g2{grid-template-columns:1fr}}
-.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
-@media(min-width:580px){.stats{grid-template-columns:repeat(4,1fr)}}
-.stat{background:var(--s);border:1px solid var(--b);border-radius:8px;padding:14px;text-align:center}
-.stn{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:700;color:var(--a)}
-.stl{font-size:9px;color:var(--m);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:1px;margin-top:3px}
-.idea{background:var(--s);border:1px solid var(--b);border-left:4px solid var(--g);border-radius:0 8px 8px 0;padding:14px 16px;margin-bottom:10px}
-.idea-s{font-family:'DM Mono',monospace;font-size:9px;color:var(--g);text-transform:uppercase;letter-spacing:2px;margin-bottom:5px}
-.idea-t{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--a);margin-bottom:5px}
-.idea-h{font-size:12px;color:var(--m);font-style:italic;margin-bottom:8px;border-left:2px solid var(--b);padding-left:7px}
-.tags{display:flex;gap:5px;flex-wrap:wrap}
-.tag{font-size:9px;padding:3px 7px;border-radius:4px;font-family:'DM Mono',monospace;border:1px solid var(--b);color:var(--m)}
-.tag-g{border-color:var(--g);color:#a07830}
-.tag-a{cursor:pointer;border-color:var(--a);color:var(--a);background:transparent;transition:all .2s}
-.tag-a:hover{background:var(--a);color:#fff}
-.sf{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px}
-.sb{padding:5px 10px;border-radius:4px;border:1px solid var(--b);background:transparent;color:var(--m);font-size:11px;cursor:pointer;transition:all .2s}
-.sb.active,.sb:hover{background:var(--a);color:var(--g);border-color:var(--a)}
-.post{background:var(--s);border:1px solid var(--b);border-radius:8px;padding:12px;margin-bottom:8px}
-.post-c{font-size:12px;font-weight:500;margin-bottom:5px;line-height:1.4}
-.post-s{display:flex;gap:10px;font-size:10px;color:var(--m);font-family:'DM Mono',monospace}
-.lbl{font-family:'DM Mono',monospace;font-size:9px;color:var(--g);text-transform:uppercase;letter-spacing:2px;margin-bottom:10px}
-@media(max-width:580px){.main{padding:14px}}
+.btn{background:var(--gr);color:#000;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;transition:.2s;width:100%}
+.btn:hover{opacity:.85}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-or{background:var(--or)}
+.btn-bl{background:var(--bl)}
+.out{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px;margin-top:12px;font-size:13px;line-height:1.7;white-space:pre-wrap;min-height:60px}
+.err{color:var(--red);font-size:12px;padding:8px}
+.lbl{font-size:11px;color:var(--text2);margin-bottom:6px}
+.res{font-size:13px;line-height:1.7;white-space:pre-wrap}
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+.stat{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center}
+.stat-val{font-size:22px;font-weight:700;color:var(--gr)}
+.stat-lbl{font-size:11px;color:var(--text2);margin-top:2px}
+.tag-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.tag{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:12px;cursor:pointer;transition:.2s}
+.tag.active{background:var(--gr);border-color:var(--gr);color:#000}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid #333;border-top-color:var(--gr);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.badge-green{background:rgba(0,200,150,.12);color:var(--gr);border:1px solid rgba(0,200,150,.3);border-radius:4px;padding:2px 8px;font-size:10px;font-weight:600}
+.badge-or{background:rgba(255,107,53,.12);color:var(--or);border:1px solid rgba(255,107,53,.3);border-radius:4px;padding:2px 8px;font-size:10px}
 </style>
 </head>
 <body>
-<div class="hdr">
-  <div>
-    <div class="logo">WİSREM AI</div>
-    <div class="logo-s">@ugurcaglar.wisrem · v4.0</div>
-  </div>
-  <div id="bdg" class="bdg off">BAĞLI DEĞİL</div>
-</div>
-<div class="nav">
-  <button class="tab active" onclick="go('conn',this)">🔑 Bağlantı</button>
-  <button class="tab" onclick="go('dash',this)">📊 Dashboard</button>
-  <button class="tab" onclick="go('ideas',this)">💡 Fikirler</button>
-  <button class="tab" onclick="go('hooks',this)">🎯 Hook+A/B</button>
-  <button class="tab" onclick="go('cal',this)">📅 Takvim</button>
-  <button class="tab" onclick="go('perf',this)">📈 Performans</button>
-  <button class="tab" onclick="go('rival',this)">👁 Rakip</button>
-  <button class="tab" onclick="go('boost',this)">🚀 Reklam</button>
-</div>
-<div class="main">
 
-<div class="pnl active" id="pnl-conn">
-  <div class="ttl">API Bağlantısı</div>
-  <div class="sub">// VERCEL → META GRAPH API</div>
-  <div class="wrn">⚠️ Token bu oturumda saklanır. Sayfa yenilenince tekrar girmen gerekir.</div>
+<div class="top">
+  <span class="logo">WİSREM AI</span>
+  <span class="handle">@ugurcaglar.wisrem · v4.1</span>
+  <span class="badge" id="conn-badge">BAĞLI DEĞİL</span>
+</div>
+
+<nav>
+  <button class="active" onclick="showPage('conn',this)">🔑 Bağlantı</button>
+  <button onclick="showPage('dash',this)">📊 Dashboard</button>
+  <button onclick="showPage('ideas',this)">💡 Fikirler</button>
+  <button onclick="showPage('hook',this)">🎯 Hook+A/B</button>
+  <button onclick="showPage('cal',this)">📅 Takvim</button>
+  <button onclick="showPage('perf',this)">📈 Performans</button>
+  <button onclick="showPage('rival',this)">👁 Rakip</button>
+  <button onclick="showPage('ads',this)">🚀 Reklam</button>
+</nav>
+
+<!-- BAĞLANTI -->
+<div class="page active" id="page-conn">
   <div class="card">
+    <div class="card-title">// VERCEL → META GRAPH API</div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:14px">⚠️ Token bu oturumda saklanır. Sayfa yenilenince tekrar girmen gerekir.</p>
     <label>Access Token (Graph API Explorer'dan)</label>
-    <input type="password" id="tok" placeholder="EAAch... token yapıştır">
+    <input type="password" id="ig-token" placeholder="EAAxxxxx...">
+    <div style="height:10px"></div>
     <label>Instagram Business ID</label>
-    <input type="text" id="igid" value="17841464135271994">
-    <button class="btn btn-d" onclick="doConnect()" id="btn-conn">🔑 Bağlan & Test Et</button>
+    <input type="text" id="ig-id" placeholder="17841400000000000">
+    <div style="height:12px"></div>
+    <button class="btn" onclick="doConnect()">🔑 Bağlan &amp; Test Et</button>
+    <div class="out" id="conn-out" style="display:none"></div>
   </div>
-  <div id="conn-res"></div>
-  <div class="card" style="border-left:4px solid var(--g)">
-    <div class="lbl">Token Nasıl Alınır</div>
-    <div style="font-size:12px;line-height:1.9;color:var(--m)">
-      1. developers.facebook.com/tools/explorer git<br>
-      2. Meta App: "Wisrem geçiş" seç<br>
-      3. 4 izni seç: read_insights, pages_show_list, business_management, instagram_manage_comments<br>
-      4. Generate Access Token → kopyala → buraya yapıştır
-    </div>
-  </div>
-</div>
-
-<div class="pnl" id="pnl-dash">
-  <div class="ttl">Canlı Dashboard</div>
-  <div class="sub">// GERÇEK VERİ — @ugurcaglar.wisrem</div>
-  <button class="btn btn-d" onclick="loadDashboard()" id="btn-refresh" style="margin-bottom:16px">🔄 Verileri Yenile</button>
-  <div id="dash-out"><div class="wrn">Bağlandıktan sonra "Verileri Yenile" tıkla.</div></div>
-</div>
-
-<div class="pnl" id="pnl-ideas">
-  <div class="ttl">İçerik Fikir Üreteci</div>
-  <div class="sub">// GAYRİMENKUL · YATIRIM · HUKUK · PROJE</div>
   <div class="card">
-    <div class="sf">
-      <button class="sb active" onclick="setSer(this,'all')">Tümü</button>
-      <button class="sb" onclick="setSer(this,'egitim')">🎓 Gayrimenkul Okulu</button>
-      <button class="sb" onclick="setSer(this,'proje')">🏢 Proje</button>
-      <button class="sb" onclick="setSer(this,'yatirim')">📈 Yatırım</button>
-      <button class="sb" onclick="setSer(this,'hukuk')">⚖️ Hukuk</button>
-      <button class="sb" onclick="setSer(this,'tapu')">📄 Tapu</button>
+    <div class="card-title">Token Nasıl Alınır</div>
+    <ol style="font-size:12px;color:var(--text2);line-height:2;padding-left:16px">
+      <li>developers.facebook.com/tools/explorer git</li>
+      <li>Meta App: "Wisrem geçiş" seç</li>
+      <li>4 izni seç: read_insights, pages_show_list, business_management, instagram_manage_comments</li>
+      <li>Generate Access Token → kopyala → buraya yapıştır</li>
+    </ol>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="page" id="page-dash">
+  <div class="card">
+    <div class="card-title">// GERÇEK VERİ — @ugurcaglar.wisrem</div>
+    <button class="btn" onclick="doDash()">🔄 Verileri Yenile</button>
+    <div class="out" id="dash-out">Bağlandıktan sonra "Verileri Yenile" tıkla.</div>
+  </div>
+</div>
+
+<!-- FİKİRLER -->
+<div class="page" id="page-ideas">
+  <div class="card">
+    <div class="card-title">// GAYRİMENKUL · YATIRIM · HUKUK · PROJE</div>
+    <div class="tag-row" id="cat-tags">
+      <span class="tag active" onclick="selTag(this,'')">Tümü</span>
+      <span class="tag" onclick="selTag(this,'Gayrimenkul Okulu')">🎓 Gayrimenkul Okulu</span>
+      <span class="tag" onclick="selTag(this,'Proje')">🏢 Proje</span>
+      <span class="tag" onclick="selTag(this,'Yatırım')">📈 Yatırım</span>
+      <span class="tag" onclick="selTag(this,'Hukuk')">⚖️ Hukuk</span>
+      <span class="tag" onclick="selTag(this,'Tapu')">📄 Tapu</span>
     </div>
-    <div class="g2">
-      <div><label>Kaç Fikir</label><select id="i-cnt"><option value="3">3</option><option value="5" selected>5</option><option value="7">7</option></select></div>
-      <div><label>Lokasyon</label><select id="i-loc"><option value="genel">Türkiye Genel</option><option value="kibris">Kıbrıs</option><option value="dubai">Dubai</option><option value="istanbul">İstanbul</option></select></div>
+    <div class="row">
+      <div>
+        <label>Kaç Fikir</label>
+        <select id="idea-count">
+          <option>3</option>
+          <option selected>5</option>
+          <option>7</option>
+        </select>
+      </div>
+      <div>
+        <label>Lokasyon</label>
+        <select id="idea-loc">
+          <option>Türkiye Genel</option>
+          <option>Kıbrıs</option>
+          <option>Dubai</option>
+          <option>İstanbul</option>
+        </select>
+      </div>
     </div>
+    <div style="height:10px"></div>
     <label>Ekstra Not</label>
-    <input type="text" id="i-note" placeholder="Ocean Life'a bağla, güncel faiz işle...">
-    <button class="btn btn-d" onclick="genIdeas()" id="btn-ideas">⚡ Fikir Üret</button>
+    <input type="text" id="idea-note" placeholder="Trend konu, özel istek...">
+    <div style="height:12px"></div>
+    <button class="btn" onclick="doIdeas()">⚡ Fikir Üret</button>
+    <div class="out" id="ideas-out" style="display:none"></div>
   </div>
-  <div id="ideas-out"></div>
 </div>
 
-<div class="pnl" id="pnl-hooks">
-  <div class="ttl">Hook & A/B Test</div>
-  <div class="sub">// İLK 3 SANİYE HER ŞEYDİR</div>
+<!-- HOOK -->
+<div class="page" id="page-hook">
   <div class="card">
+    <div class="card-title">// İLK 3 SANİYE HER ŞEYDİR</div>
     <label>Video Konusu</label>
-    <input type="text" id="h-top" placeholder="Kat irtifakı ile kat mülkiyeti farkı">
+    <input type="text" id="hook-topic" placeholder="Kat mülkiyeti nedir, Kıbrıs yatırımı...">
+    <div style="height:10px"></div>
     <label>Hedef Kitle</label>
-    <select id="h-aud"><option>Ev almak isteyen (ilk kez)</option><option>Yatırımcı</option><option>Broker / Emlakçı</option><option>Yurt dışı yatırımcı</option></select>
-    <button class="btn btn-d" onclick="genHooks()" id="btn-hooks" style="margin-top:4px">🎯 Hook Üret</button>
+    <select id="hook-aud">
+      <option>Ev almak isteyen (ilk kez)</option>
+      <option>Yatırımcı</option>
+      <option>Broker / Emlakçı</option>
+      <option>Yurt dışı yatırımcı</option>
+    </select>
+    <div style="height:12px"></div>
+    <button class="btn btn-or" onclick="doHook()">🎯 Hook Üret</button>
+    <div class="out" id="hook-out" style="display:none"></div>
   </div>
-  <div id="hooks-out"></div>
 </div>
 
-<div class="pnl" id="pnl-cal">
-  <div class="ttl">İçerik Takvimi</div>
-  <div class="sub">// HAFTALIK YAYIN PLANI</div>
+<!-- TAKVİM -->
+<div class="page" id="page-cal">
   <div class="card">
-    <div class="g2">
-      <div><label>Haftalık Video</label><select id="c-freq"><option value="3">Haftada 3</option><option value="4">Haftada 4</option><option value="5" selected>Haftada 5</option></select></div>
-      <div><label>Öncelik</label><select id="c-prio"><option>Dengeli</option><option>Gayrimenkul Okulu</option><option>Proje Tanıtım</option><option>Yatırım Analizi</option></select></div>
+    <div class="card-title">// HAFTALIK YAYIN PLANI</div>
+    <div class="row">
+      <div>
+        <label>Haftalık Video</label>
+        <select id="cal-freq">
+          <option>Haftada 3</option>
+          <option>Haftada 4</option>
+          <option selected>Haftada 5</option>
+        </select>
+      </div>
+      <div>
+        <label>Öncelik</label>
+        <select id="cal-prio">
+          <option>Dengeli</option>
+          <option>Gayrimenkul Okulu</option>
+          <option>Proje Tanıtım</option>
+          <option>Yatırım Analizi</option>
+        </select>
+      </div>
     </div>
-    <button class="btn btn-d" onclick="genCal()" id="btn-cal">📅 Plan Oluştur</button>
+    <div style="height:12px"></div>
+    <button class="btn" onclick="doCal()">📅 Plan Oluştur</button>
+    <div class="out" id="cal-out" style="display:none"></div>
   </div>
-  <div id="cal-out"></div>
 </div>
 
-<div class="pnl" id="pnl-perf">
-  <div class="ttl">Performans Takibi</div>
-  <div class="sub">// VERİ GİRİŞİ + ANALİZ</div>
-  <div class="card" style="border-left:4px solid var(--g)">
-    <div class="lbl">📌 Referans — Bölüm 1</div>
-    <div class="stats">
-      <div class="stat"><div class="stn">66.6K</div><div class="stl">TikTok</div></div>
-      <div class="stat"><div class="stn">14K</div><div class="stl">IG Görüntüleme</div></div>
-      <div class="stat"><div class="stn">143</div><div class="stl">Kaydetme</div></div>
-      <div class="stat"><div class="stn">401</div><div class="stl">Yeni Takipçi</div></div>
-    </div>
-  </div>
+<!-- PERFORMANS -->
+<div class="page" id="page-perf">
   <div class="card">
-    <div class="lbl">+ Manuel Video Ekle</div>
-    <div class="g2">
-      <div><label>Başlık</label><input type="text" id="p-ttl" placeholder="Kat Mülkiyeti Nedir?"></div>
-      <div><label>Seri</label><select id="p-ser"><option>Gayrimenkul Okulu</option><option>Proje Tanıtım</option><option>Yatırım Analizi</option><option>Gayrimenkul Hukuku</option><option>Gündem & Analiz</option><option>Tapu Bilgileri</option></select></div>
-      <div><label>İzlenme</label><input type="number" id="p-v" placeholder="0"></div>
-      <div><label>Beğeni</label><input type="number" id="p-l" placeholder="0"></div>
-      <div><label>Kaydetme</label><input type="number" id="p-s" placeholder="0"></div>
-      <div><label>Yorum</label><input type="number" id="p-c" placeholder="0"></div>
+    <div class="card-title">// VERİ GİRİŞİ + ANALİZ</div>
+    <p style="font-size:11px;color:var(--text2);margin-bottom:12px">📌 Referans — Bölüm 1</p>
+    <div class="stat-grid">
+      <div class="stat"><div class="stat-val">66.6K</div><div class="stat-lbl">TikTok</div></div>
+      <div class="stat"><div class="stat-val">14K</div><div class="stat-lbl">IG Görüntüleme</div></div>
+      <div class="stat"><div class="stat-val">143</div><div class="stat-lbl">Kaydetme</div></div>
+      <div class="stat"><div class="stat-val">401</div><div class="stat-lbl">Yeni Takipçi</div></div>
     </div>
-    <button class="btn btn-d" onclick="addPerf()" id="btn-perf">+ Analiz Et</button>
+    <hr style="border-color:var(--border);margin-bottom:14px">
+    <label>Başlık</label>
+    <input type="text" id="perf-title" placeholder="Video başlığı">
+    <div style="height:8px"></div>
+    <label>Seri</label>
+    <select id="perf-series">
+      <option>Gayrimenkul Okulu</option>
+      <option>Proje Tanıtım</option>
+      <option>Yatırım Analizi</option>
+      <option>Gayrimenkul Hukuku</option>
+      <option>Gündem &amp; Analiz</option>
+      <option>Tapu Bilgileri</option>
+    </select>
+    <div style="height:8px"></div>
+    <div class="row">
+      <div><label>İzlenme</label><input type="number" id="perf-views" placeholder="0"></div>
+      <div><label>Beğeni</label><input type="number" id="perf-likes" placeholder="0"></div>
+    </div>
+    <div style="height:8px"></div>
+    <div class="row">
+      <div><label>Kaydetme</label><input type="number" id="perf-saves" placeholder="0"></div>
+      <div><label>Yorum</label><input type="number" id="perf-comments" placeholder="0"></div>
+    </div>
+    <div style="height:12px"></div>
+    <button class="btn btn-bl" onclick="doPerf()">+ Analiz Et</button>
+    <div class="out" id="perf-out" style="display:none"></div>
   </div>
-  <div id="perf-out"></div>
 </div>
 
-<div class="pnl" id="pnl-rival">
-  <div class="ttl">Rakip Takip</div>
-  <div class="sub">// GAYRİMENKUL NİŞİ ANALİZİ</div>
+<!-- RAKİP -->
+<div class="page" id="page-rival">
   <div class="card">
-    <div class="g2">
-      <div><label>Hesap Adı</label><input type="text" id="r-h" placeholder="@hesapadı"></div>
-      <div><label>Kategori</label><select id="r-c"><option>Gayrimenkul Eğitim</option><option>Proje Pazarlama</option><option>Yatırım & Finans</option><option>Kıbrıs Gayrimenkul</option><option>Dubai Gayrimenkul</option></select></div>
-    </div>
-    <button class="btn btn-d" onclick="doRival()" id="btn-rival">👁 Analiz Et</button>
+    <div class="card-title">// GAYRİMENKUL NİŞİ ANALİZİ</div>
+    <label>Hesap Adı</label>
+    <input type="text" id="rival-handle" placeholder="remaxturkiye, century21turkey...">
+    <div style="height:10px"></div>
+    <label>Kategori</label>
+    <select id="rival-cat">
+      <option>Gayrimenkul Eğitim</option>
+      <option>Proje Pazarlama</option>
+      <option>Yatırım &amp; Finans</option>
+      <option>Kıbrıs Gayrimenkul</option>
+      <option>Dubai Gayrimenkul</option>
+    </select>
+    <div style="height:12px"></div>
+    <button class="btn" id="rival-btn" onclick="doRival()">👁 Analiz Et</button>
+    <div class="out" id="rival-out" style="display:none"></div>
   </div>
-  <div id="rival-out"></div>
-  <div id="rival-list"></div>
 </div>
 
-<div class="pnl" id="pnl-boost">
-  <div class="ttl">Reklam Optimizasyonu</div>
-  <div class="sub">// HANGİ İÇERİĞİ BOOST ET</div>
+<!-- REKLAM -->
+<div class="page" id="page-ads">
   <div class="card">
+    <div class="card-title">// HANGİ İÇERİĞİ BOOST ET</div>
     <label>İçerik Listesi (Her satıra bir video)</label>
-    <textarea id="b-list" placeholder="Kat Mülkiyeti Nedir?&#10;Ocean Life Kıbrıs&#10;5 Yılda Konut Almak Neden Zorlaştı?"></textarea>
-    <div class="g2">
-      <div><label>Aylık Bütçe (₺)</label><input type="number" id="b-bud" placeholder="3000"></div>
-      <div><label>Hedef</label><select id="b-goal"><option>Takipçi kazanma</option><option>Lead / müşteri adayı</option><option>Marka bilinirliği</option><option>Proje satışı</option></select></div>
+    <textarea id="ads-content" placeholder="Kat mülkiyeti nedir? — 66K görüntüleme&#10;Tapu türleri — 14K görüntüleme"></textarea>
+    <div style="height:8px"></div>
+    <div class="row">
+      <div><label>Aylık Bütçe (₺)</label><input type="number" id="ads-budget" placeholder="5000"></div>
+      <div>
+        <label>Hedef</label>
+        <select id="ads-goal">
+          <option>Takipçi kazanma</option>
+          <option>Lead / müşteri adayı</option>
+          <option>Marka bilinirliği</option>
+          <option>Proje satışı</option>
+        </select>
+      </div>
     </div>
-    <button class="btn btn-d" onclick="doBoost()" id="btn-boost">🚀 Boost Planı</button>
+    <div style="height:12px"></div>
+    <button class="btn btn-or" onclick="doAds()">🚀 Boost Planı</button>
+    <div class="out" id="ads-out" style="display:none"></div>
   </div>
-  <div id="boost-out"></div>
 </div>
 
-</div>
 <script>
-let TOK='', IGID='17841464135271994', SER='all';
-const rivals=[];
-const SYS=`Sen @ugurcaglar.wisrem için gayrimenkul içerik stratejistisisin. Uğur Çağlar, Wisrem Broker, 16.400+ takipçi, Türkiye/Kıbrıs/Dubai. Seriler: Gayrimenkul Okulu, Hukuk, Gündem, Tapu, Proje Tanıtım. Referans: Bölüm 1 → TikTok 66.600, IG 14.054 görüntüleme, 143 kaydetme, 401 takipçi. Ton: Profesyonel, veriye dayalı, abartısız. Türkçe cevap ver.`;
+// ── STATE ──────────────────────────────────────────────
+let TOKEN='', IGID='', selectedCat='';
 
-async function ai(p){
-  const r=await fetch('/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:SYS,prompt:p})});
-  if(!r.ok) throw new Error('AI hatası: '+r.status);
-  const d=await r.json();
-  return d.content.map(b=>b.text||'').join('');
-}
-
-async function ig(ep){
-  const r=await fetch('/api/instagram?endpoint='+encodeURIComponent(ep)+'&token='+encodeURIComponent(TOK));
-  if(!r.ok) throw new Error('API hatası: '+r.status);
-  return await r.json();
-}
-
-function go(id,btn){
-  document.querySelectorAll('.pnl').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('pnl-'+id).classList.add('active');
+// ── NAV ───────────────────────────────────────────────
+function showPage(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
   btn.classList.add('active');
 }
-function setSer(btn,v){document.querySelectorAll('.sb').forEach(b=>b.classList.remove('active'));btn.classList.add('active');SER=v;}
-function ld(id){document.getElementById(id).innerHTML='<div class="ld"><div class="sp"></div>Yükleniyor...</div>';}
 
-async function doConnect(){
-  const tok=document.getElementById('tok').value.trim();
-  const igid=document.getElementById('igid').value.trim();
-  if(!tok){alert('Token gir!');return;}
-  TOK=tok; if(igid) IGID=igid;
-  const btn=document.getElementById('btn-conn');
-  btn.disabled=true;
-  document.getElementById('conn-res').innerHTML='<div class="ld"><div class="sp"></div>Bağlanıyor...</div>';
-  try{
-    const me=await ig('me?fields=id,name');
-    if(me.error) throw new Error(me.error.message);
-    let igTxt='';
-    try{const d=await ig(IGID+'?fields=username,followers_count,media_count');if(!d.error)igTxt=`<br>📸 @${d.username||'ugurcaglar.wisrem'} · 👥 ${d.followers_count?d.followers_count.toLocaleString():'16.400+'} takipçi`;}catch(e){}
-    document.getElementById('bdg').className='bdg on';
-    document.getElementById('bdg').textContent='✓ BAĞLI';
-    document.getElementById('conn-res').innerHTML=`<div class="ok">✅ Bağlantı başarılı! ${me.name}${igTxt}<br><br><button class="btn btn-d" onclick="loadDashboard();go('dash',document.querySelectorAll('.tab')[1])">→ Dashboard'a Git</button></div>`;
-  }catch(e){
-    TOK='';
-    document.getElementById('bdg').className='bdg off';
-    document.getElementById('bdg').textContent='BAĞLI DEĞİL';
-    document.getElementById('conn-res').innerHTML=`<div class="err">❌ ${e.message}<br>Token geçersiz veya süresi dolmuş.</div>`;
+// ── TAG SEÇİMİ ────────────────────────────────────────
+function selTag(el,val){
+  document.querySelectorAll('#cat-tags .tag').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  selectedCat=val;
+}
+
+// ── LOADING ───────────────────────────────────────────
+function setLoading(outId,btnId,state,btnText){
+  const out=document.getElementById(outId);
+  const btn=btnId?document.getElementById(btnId):null;
+  if(state){
+    out.style.display='block';
+    out.innerHTML='<span class="spin"></span> Yükleniyor...';
+    if(btn)btn.disabled=true;
+  } else {
+    if(btn){btn.disabled=false;if(btnText)btn.textContent=btnText;}
   }
-  btn.disabled=false;
 }
 
-async function loadDashboard(){
-  if(!TOK){alert('Önce bağlan!');return;}
-  const btn=document.getElementById('btn-refresh');
-  btn.disabled=true;btn.textContent='⏳ Yükleniyor...';
-  ld('dash-out');
-  try{
-    const d=await ig(IGID+'?fields=username,followers_count,media_count');
-    let html=`<div class="stats"><div class="stat"><div class="stn">${d.followers_count?d.followers_count.toLocaleString():'16.4K'}</div><div class="stl">Takipçi</div></div><div class="stat"><div class="stn">${d.media_count||'53'}</div><div class="stl">Gönderi</div></div><div class="stat"><div class="stn">-</div><div class="stl">Bu Hafta İzlenme</div></div><div class="stat"><div class="stn">-</div><div class="stl">Etkileşim</div></div></div>`;
-    try{
-      const m=await ig(IGID+'/media?fields=id,caption,media_type,timestamp,like_count,comments_count&limit=6');
-      if(m.data&&m.data.length){
-        html+=`<div style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--a);margin-bottom:10px">Son Paylaşımlar</div>`;
-        m.data.forEach(p=>{const cap=p.caption?p.caption.substring(0,65)+'...':'(başlık yok)';const dt=new Date(p.timestamp).toLocaleDateString('tr-TR');html+=`<div class="post"><div class="post-c">${cap}</div><div class="post-s"><span>❤️ ${p.like_count||0}</span><span>💬 ${p.comments_count||0}</span><span>📅 ${dt}</span></div></div>`;});
-      }
-    }catch(e){}
-    document.getElementById('dash-out').innerHTML=html;
-  }catch(e){document.getElementById('dash-out').innerHTML=`<div class="err">Veri çekilemedi: ${e.message}</div>`;}
-  btn.disabled=false;btn.textContent='🔄 Verileri Yenile';
+// ── AI ÇAĞRI ─────────────────────────────────────────
+async function ai(prompt){
+  const r=await fetch('/api/ai',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({prompt})
+  });
+  const d=await r.json();
+  if(d.error)throw new Error(d.error);
+  return d.result||d.content||'';
 }
 
-async function genIdeas(){
-  const cnt=document.getElementById('i-cnt').value;
-  const loc=document.getElementById('i-loc').value;
-  const note=document.getElementById('i-note').value;
-  const btn=document.getElementById('btn-ideas');
-  btn.disabled=true;ld('ideas-out');
-  const sm={all:'karma',egitim:'Gayrimenkul Okulu',proje:'Proje Tanıtım',yatirim:'Yatırım Analizi',hukuk:'Gayrimenkul Hukuku',tapu:'Tapu Bilgileri'};
-  const lm={genel:'Türkiye',kibris:'Kıbrıs',dubai:'Dubai',istanbul:'İstanbul'};
+// ── INSTAGRAM API ─────────────────────────────────────
+async function igCall(endpoint){
+  const r=await fetch(`/api/instagram?token=${TOKEN}&endpoint=${encodeURIComponent(endpoint)}`);
+  return r.json();
+}
+
+// ── BAĞLANTI ─────────────────────────────────────────
+async function doConnect(){
+  TOKEN=document.getElementById('ig-token').value.trim();
+  IGID=document.getElementById('ig-id').value.trim();
+  if(!TOKEN||!IGID){alert('Token ve ID gerekli!');return;}
+  setLoading('conn-out',null,true);
   try{
-    const txt=await ai(`${cnt} video fikri üret. Seri: ${sm[SER]}, Lokasyon: ${lm[loc]}. ${note?'Not: '+note:''}
-Her fikir için:
-FİKİR [n]
-Seri: [seri]
-Başlık: [başlık]
-Hook: [ilk 3 saniye]
-Format: Reels [süre]
-Yayın: [gün + saat]
-Neden: [kısa gerekçe]
----`);
-    const ideas=txt.split('---').filter(s=>s.trim());
-    document.getElementById('ideas-out').innerHTML=ideas.map(idea=>{
-      const lines=idea.trim().split('\n').filter(l=>l.trim());
-      let s='',b='',h='',f='',y='',n='';
-      lines.forEach(l=>{
-        if(l.startsWith('Seri:'))s=l.replace('Seri:','').trim();
-        if(l.startsWith('Başlık:'))b=l.replace('Başlık:','').trim();
-        if(l.startsWith('Hook:'))h=l.replace('Hook:','').trim();
-        if(l.startsWith('Format:'))f=l.replace('Format:','').trim();
-        if(l.startsWith('Yayın:'))y=l.replace('Yayın:','').trim();
-        if(l.startsWith('Neden:'))n=l.replace('Neden:','').trim();
+    const d=await igCall(`${IGID}?fields=name,username,followers_count,media_count`);
+    if(d.error)throw new Error(d.error.message);
+    document.getElementById('conn-out').innerHTML=
+      `<span class="badge-green">✅ BAĞLANDI</span><br><br>`+
+      `<b>${d.name}</b> @${d.username}<br>`+
+      `Takipçi: <b>${(d.followers_count||0).toLocaleString('tr')}</b> · Gönderi: <b>${d.media_count||0}</b>`;
+    document.getElementById('conn-badge').textContent='BAĞLI';
+    document.getElementById('conn-badge').classList.add('on');
+  }catch(e){
+    document.getElementById('conn-out').innerHTML=`<span class="err">❌ ${e.message}</span>`;
+  }
+}
+
+// ── DASHBOARD ────────────────────────────────────────
+async function doDash(){
+  if(!TOKEN){alert('Önce bağlan!');return;}
+  setLoading('dash-out',null,true);
+  try{
+    const d=await igCall(`${IGID}?fields=name,username,followers_count,media_count,profile_picture_url`);
+    const m=await igCall(`${IGID}/media?fields=id,caption,media_type,timestamp,like_count,comments_count&limit=5`);
+    let html=`<span class="badge-green">● GERÇEK VERİ</span><br><br>`+
+      `<b>${d.name}</b> · @${d.username}<br>`+
+      `Takipçi: <b>${(d.followers_count||0).toLocaleString('tr')}</b> · Gönderi: <b>${d.media_count}</b><br><br>`+
+      `<b>Son 5 İçerik:</b><br>`;
+    if(m.data&&m.data.length){
+      m.data.forEach(p=>{
+        const cap=(p.caption||'').substring(0,60);
+        html+=`• ${cap}... — ❤️${p.like_count||0} 💬${p.comments_count||0}<br>`;
       });
-      if(!b)return '';
-      return `<div class="idea"><div class="idea-s">${s}</div><div class="idea-t">${b}</div><div class="idea-h">"${h}"</div>${n?`<div style="font-size:11px;color:var(--m);margin-bottom:7px">→ ${n}</div>`:''}<div class="tags"><span class="tag tag-g">🎬 ${f}</span><span class="tag" style="border-color:var(--gr);color:var(--gr)">📅 ${y}</span><button class="tag tag-a" onclick="toHook('${b.replace(/'/g,"\\'")}')">Hook →</button></div></div>`;
-    }).join('')||`<div class="res">${txt}</div>`;
-  }catch(e){document.getElementById('ideas-out').innerHTML=`<div class="err">${e.message}</div>`;}
-  btn.disabled=false;
+    }
+    document.getElementById('dash-out').innerHTML=html;
+  }catch(e){
+    document.getElementById('dash-out').innerHTML=`<span class="err">❌ ${e.message}</span>`;
+  }
 }
 
-function toHook(t){document.getElementById('h-top').value=t;document.querySelectorAll('.tab')[3].click();genHooks();}
-
-async function genHooks(){
-  const top=document.getElementById('h-top').value;
-  const aud=document.getElementById('h-aud').value;
-  if(!top){alert('Konu gir!');return;}
-  const btn=document.getElementById('btn-hooks');
-  btn.disabled=true;ld('hooks-out');
+// ── FİKİRLER ─────────────────────────────────────────
+async function doIdeas(){
+  const count=document.getElementById('idea-count').value;
+  const loc=document.getElementById('idea-loc').value;
+  const note=document.getElementById('idea-note').value;
+  const cat=selectedCat||'Gayrimenkul Genel';
+  setLoading('ideas-out',null,true);
   try{
-    const txt=await ai(`Video: "${top}", Hedef: ${aud}\nHOOK A (Şok): ...\nHOOK B (Soru): ...\nHOOK C (İstatistik): ...\nBAŞLIK A (Direkt): ...\nBAŞLIK B (Merak): ...\nCAPTION KAPANIŞI: ...\nGerçekçi ve savunulabilir.`);
-    document.getElementById('hooks-out').innerHTML=`<div class="card"><div class="lbl">"${top}"</div><div class="res">${txt.replace(/\n/g,'<br>')}</div></div>`;
-  }catch(e){document.getElementById('hooks-out').innerHTML=`<div class="err">${e.message}</div>`;}
-  btn.disabled=false;
+    const txt=await ai(
+      `Sen Uğur Çağlar için içerik üretiyorsun. Gayrimenkul brokeri, kişisel marka inşa ediyor. `+
+      `Kategori: ${cat}. Lokasyon: ${loc}. ${note?'Ekstra not: '+note:''} `+
+      `${count} adet viral Reels fikri üret. Her fikir için: başlık, hook (ilk 3 sn), neden viral olur. `+
+      `Gerçek ve savunulabilir bilgi kullan. Abartma.`
+    );
+    document.getElementById('ideas-out').style.display='block';
+    document.getElementById('ideas-out').innerHTML=txt;
+  }catch(e){
+    document.getElementById('ideas-out').style.display='block';
+    document.getElementById('ideas-out').innerHTML=`<span class="err">${e.message}</span>`;
+  }
 }
 
-async function genCal(){
-  const freq=document.getElementById('c-freq').value;
-  const prio=document.getElementById('c-prio').value;
-  const btn=document.getElementById('btn-cal');
-  btn.disabled=true;ld('cal-out');
+// ── HOOK ─────────────────────────────────────────────
+async function doHook(){
+  const topic=document.getElementById('hook-topic').value.trim();
+  const aud=document.getElementById('hook-aud').value;
+  if(!topic){alert('Konu gir!');return;}
+  setLoading('hook-out',null,true);
   try{
-    const txt=await ai(`@ugurcaglar.wisrem haftalık takvim. Haftada ${freq} video, öncelik: ${prio}. Format: GÜN+SAAT | SERİ | KONU | FORMAT. ${freq} yayın.`);
-    document.getElementById('cal-out').innerHTML=`<div class="card"><div class="lbl">📅 Haftalık Plan</div><div class="res">${txt.replace(/\n/g,'<br>')}</div></div>`;
-  }catch(e){document.getElementById('cal-out').innerHTML=`<div class="err">${e.message}</div>`;}
-  btn.disabled=false;
+    const txt=await ai(
+      `Gayrimenkul Reels için hook ve A/B test versiyonları yaz. `+
+      `Konu: "${topic}". Hedef kitle: ${aud}. `+
+      `3 farklı hook versiyonu yaz (A/B/C). Her biri max 2 cümle, ilk 3 saniye için. `+
+      `Sonra her birinin neden çalışacağını açıkla.`
+    );
+    document.getElementById('hook-out').style.display='block';
+    document.getElementById('hook-out').innerHTML=txt;
+  }catch(e){
+    document.getElementById('hook-out').style.display='block';
+    document.getElementById('hook-out').innerHTML=`<span class="err">${e.message}</span>`;
+  }
 }
 
-async function addPerf(){
-  const ttl=document.getElementById('p-ttl').value;
-  const ser=document.getElementById('p-ser').value;
-  const v=parseInt(document.getElementById('p-v').value)||0;
-  const l=parseInt(document.getElementById('p-l').value)||0;
-  const s=parseInt(document.getElementById('p-s').value)||0;
-  const c=parseInt(document.getElementById('p-c').value)||0;
-  if(!ttl||!v){alert('Başlık ve izlenme zorunlu!');return;}
-  const eng=(((l+s+c)/v)*100).toFixed(2);
-  const btn=document.getElementById('btn-perf');
-  btn.disabled=true;ld('perf-out');
+// ── TAKVİM ───────────────────────────────────────────
+async function doCal(){
+  const freq=document.getElementById('cal-freq').value;
+  const prio=document.getElementById('cal-prio').value;
+  setLoading('cal-out',null,true);
   try{
-    const txt=await ai(`Wisrem video: "${ttl}" (${ser}). İzlenme:${v}, Beğeni:${l}, Kaydetme:${s}, Yorum:${c}, Etkileşim:%${eng}. Referans: 14.054 görüntüleme, 143 kaydetme. 1)Performans? 2)En güçlü metrik? 3)Zayıf nokta? 4)Seri devam etmeli? 5)Sonraki adım.`);
-    document.getElementById('perf-out').innerHTML=`<div class="card" style="border-left:4px solid var(--g)"><div class="lbl">"${ttl}" Analizi</div><div class="res">${txt.replace(/\n/g,'<br>')}</div></div>`;
-  }catch(e){document.getElementById('perf-out').innerHTML=`<div class="err">${e.message}</div>`;}
-  btn.disabled=false;
+    const txt=await ai(
+      `Uğur Çağlar için ${freq} yayın yapacak haftalık içerik takvimi oluştur. `+
+      `Öncelik: ${prio}. `+
+      `Kategoriler: Gayrimenkul Okulu, Proje Tanıtım, Yatırım Analizi, Hukuk, Tapu, Vlog. `+
+      `Her gün için: hangi gün, seri adı, video konusu, yayın saati öner. `+
+      `Pazartesiden başla. Gerçekçi ve uygulanabilir plan yap.`
+    );
+    document.getElementById('cal-out').style.display='block';
+    document.getElementById('cal-out').innerHTML=txt;
+  }catch(e){
+    document.getElementById('cal-out').style.display='block';
+    document.getElementById('cal-out').innerHTML=`<span class="err">${e.message}</span>`;
+  }
 }
 
+// ── PERFORMANS ───────────────────────────────────────
+async function doPerf(){
+  const title=document.getElementById('perf-title').value.trim();
+  const series=document.getElementById('perf-series').value;
+  const views=document.getElementById('perf-views').value||0;
+  const likes=document.getElementById('perf-likes').value||0;
+  const saves=document.getElementById('perf-saves').value||0;
+  const comments=document.getElementById('perf-comments').value||0;
+  if(!title){alert('Başlık gir!');return;}
+  setLoading('perf-out',null,true);
+  const engRate=views>0?((+likes+ +saves*3+ +comments*2)/views*100).toFixed(2):0;
+  try{
+    const txt=await ai(
+      `Gayrimenkul Instagram videosu performans analizi yap. `+
+      `Video: "${title}" (${series} serisi). `+
+      `Veriler: ${views} görüntüleme, ${likes} beğeni, ${saves} kaydetme, ${comments} yorum. `+
+      `Etkileşim oranı: %${engRate}. `+
+      `Referans: Bölüm 1 — 66.600 TikTok izlenme, 14.054 IG görüntüleme, 143 kaydetme, 401 takipçi. `+
+      `Analiz et: Bu video başarılı mı? Devam etmeli mi? Neden? Sonraki video için 3 öneri.`
+    );
+    document.getElementById('perf-out').style.display='block';
+    document.getElementById('perf-out').innerHTML=`<span class="badge-or">Etkileşim: %${engRate}</span><br><br>`+txt;
+  }catch(e){
+    document.getElementById('perf-out').style.display='block';
+    document.getElementById('perf-out').innerHTML=`<span class="err">${e.message}</span>`;
+  }
+}
+
+// ── RAKİP ANALİZİ (DÜZELTİLMİŞ) ────────────────────
 async function doRival(){
-  const h=document.getElementById('r-h').value;
-  const c=document.getElementById('r-c').value;
-  if(!h){alert('Hesap adi gir!');return;}
-  rivals.push({h,c});
-  let listHTML='';
-  for(let i=0;i<rivals.length;i++){const r=rivals[i];listHTML+='<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 13px;background:var(--s);border:1px solid var(--b);border-radius:6px;margin-top:8px"><div><div style="font-weight:600;font-size:13px">'+r.h+'</div><div style="font-size:11px;color:var(--m)">'+r.c+'</div></div><span class="tag tag-g">TAKIPTE</span></div>';}
-  document.getElementById('rival-list').innerHTML=listHTML;
-  const btn=document.getElementById('btn-rival');
-  btn.disabled=true;ld('rival-out');
+  const h=document.getElementById('rival-handle').value.trim();
+  const c=document.getElementById('rival-cat').value;
+  if(!h){alert('Hesap adı gir!');return;}
+
+  const btn=document.getElementById('rival-btn');
+  const out=document.getElementById('rival-out');
+  btn.disabled=true;
+  out.style.display='block';
+  out.innerHTML='<span class="spin"></span> Apify ile gerçek veri çekiliyor...';
+
+  let apifyInfo='';
+
   try{
-    let apifyData='';
-    try{
-      const ap=await fetch('/api/instagram?action=apify&type=competitor&target='+encodeURIComponent(h));
-      const apd=await ap.json();
-      if(apd){
-        const arr=Array.isArray(apd)?apd:[apd];
-        const p=arr[0];
-        if(p&&p.followersCount){apifyData='Gercek Veri - Takipci: '+p.followersCount+', Gonderi: '+(p.postsCount||'?')+'. ';}
-      }
-    }catch(apifyErr){}
-    const txt=await ai('Gayrimenkul Instagram hesabi: '+h+' ('+c+'). '+apifyData+'1)Viral icerik formatlari? 2)Wisrem ne ogrenmeli? 3)Wisrem avantajlari? 4)Farklilasmak icin 3 oneri.');
-    const gercekBadge=apifyData?'<span style="color:var(--gr);font-size:9px"> GERCEK VERI</span>':'';
-    document.getElementById('rival-out').innerHTML='<div class="card"><div class="lbl">'+h+gercekBadge+'</div><div class="res">'+txt.replace(/\n/g,'<br>')+'</div></div>';
-  }catch(e){document.getElementById('rival-out').innerHTML='<div class="err">'+e.message+'</div>';}
+    // Apify'dan gerçek Instagram verisi çek
+    const apifyRes=await fetch(`/api/instagram?action=apify&type=competitor&target=${encodeURIComponent(h)}`);
+    const apifyRaw=await apifyRes.json();
+
+    // DÜZELTİLMİŞ: Hem array hem obje formatını handle et
+    let item=null;
+    if(Array.isArray(apifyRaw)&&apifyRaw.length>0){
+      item=apifyRaw[0];
+    } else if(apifyRaw&&typeof apifyRaw==='object'&&!apifyRaw.error&&apifyRaw.username){
+      item=apifyRaw;
+    }
+
+    if(item){
+      apifyInfo=
+        `GERÇEK VERİ (Apify):\n`+
+        `Kullanıcı: @${item.username||h}\n`+
+        `Takipçi: ${(item.followersCount||item.followersCount||0).toLocaleString('tr')}\n`+
+        `Takip: ${(item.followsCount||0).toLocaleString('tr')}\n`+
+        `Gönderi: ${item.postsCount||0}\n`+
+        `Biyografi: ${item.biography||'-'}\n`+
+        `Doğrulanmış: ${item.verified?'Evet':'Hayır'}\n`+
+        `Kategori: ${item.businessCategoryName||'-'}`;
+      out.innerHTML='<span class="badge-green">● GERÇEK VERİ</span> Apify bağlı · AI analiz yapılıyor...';
+    } else {
+      out.innerHTML='<span class="badge-or">● AI ANALİZ</span> Apify veri bulamadı · AI ile devam ediliyor...';
+    }
+  }catch(apifyErr){
+    out.innerHTML='<span class="badge-or">● AI ANALİZ</span> Apify bağlanamadı · AI ile devam ediliyor...';
+  }
+
+  // AI analizi — Apify verisiyle veya verisiz
+  try{
+    const prompt=
+      `Gayrimenkul Instagram hesabı rakip analizi yap.\n`+
+      `Hesap: @${h} (${c})\n`+
+      `${apifyInfo?apifyInfo:'Gerçek veri yok, genel bilginle analiz et.'}\n\n`+
+      `Şu soruları yanıtla:\n`+
+      `1) Bu hesabın içerik stratejisi ne?\n`+
+      `2) Viral içerik formatları neler?\n`+
+      `3) Uğur Çağlar (@ugurcaglar.wisrem, 16.4K takipçi) bu hesaptan ne öğrenmeli?\n`+
+      `4) Wisrem'in bu hesaba karşı avantajları neler?\n`+
+      `5) Farklılaşmak için 3 somut öneri.\n`+
+      `Gerçek ve savunulabilir bilgi kullan.`;
+
+    const txt=await ai(prompt);
+    out.innerHTML=
+      (apifyInfo?'<span class="badge-green">● GERÇEK VERİ</span>':'<span class="badge-or">● AI ANALİZ</span>')+
+      ` @${h}<br><br>`+
+      (apifyInfo?`<div style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:10px;margin-bottom:12px;font-size:12px;color:var(--text2)">${apifyInfo.replace(/\n/g,'<br>')}</div>`:'')+
+      `<div style="font-size:13px;line-height:1.7">${txt.replace(/\n/g,'<br>')}</div>`;
+  }catch(e){
+    out.innerHTML=`<span class="err">❌ AI hatası: ${e.message}</span>`;
+  }
+
   btn.disabled=false;
 }
 
-async function doBoost(){
-  const list=document.getElementById('b-list').value;
-  const bud=document.getElementById('b-bud').value;
-  const goal=document.getElementById('b-goal').value;
-  if(!list){alert('Liste gir!');return;}
-  const btn=document.getElementById('btn-boost');
-  btn.disabled=true;ld('boost-out');
+// ── REKLAM ───────────────────────────────────────────
+async function doAds(){
+  const content=document.getElementById('ads-content').value.trim();
+  const budget=document.getElementById('ads-budget').value||'5000';
+  const goal=document.getElementById('ads-goal').value;
+  if(!content){alert('İçerik listesi gir!');return;}
+  setLoading('ads-out',null,true);
   try{
-    const txt=await ai(`Wisrem (16.4K takipçi) reklam stratejisi.\nVideolar:\n${list}\nBütçe: ${bud||'?'}₺, Hedef: ${goal}.\n1)Öncelik sırası 2)Bütçe dağılımı 3)Meta Ads hedef kitle 4)Boost süresi 5)Organik+ücretli kombinasyon.`);
-    document.getElementById('boost-out').innerHTML=`<div class="card"><div class="lbl">🚀 Boost Planı</div><div class="res">${txt.replace(/\n/g,'<br>')}</div></div>`;
-  }catch(e){document.getElementById('boost-out').innerHTML=`<div class="err">${e.message}</div>`;}
-  btn.disabled=false;
+    const txt=await ai(
+      `Instagram reklam optimizasyonu. Uğur Çağlar, gayrimenkul broker.\n`+
+      `İçerikler:\n${content}\n`+
+      `Aylık bütçe: ${budget}₺. Hedef: ${goal}.\n`+
+      `Öner: hangi video boost edilmeli, neden, ne kadar bütçe, hangi hedef kitle (yaş, ilgi, lokasyon), `+
+      `hangi süre (gün), beklenen sonuç. Gerçekçi beklentiler ver.`
+    );
+    document.getElementById('ads-out').style.display='block';
+    document.getElementById('ads-out').innerHTML=txt;
+  }catch(e){
+    document.getElementById('ads-out').style.display='block';
+    document.getElementById('ads-out').innerHTML=`<span class="err">${e.message}</span>`;
+  }
 }
 </script>
 </body>
