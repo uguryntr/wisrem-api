@@ -721,8 +721,22 @@ async function askDash(){
   hist.scrollTop=hist.scrollHeight;
 
   try{
-    // Tüm geçmişi + profil verisini context'e al
-    const fullContext=await MEM.getContext()||window._dashContext||'@ugurcaglar.wisrem Instagram hesabı';
+    // Profil + sohbet geçmişini ayrı ayrı çek
+    const profile = await MEM.getProfile();
+    const chatHistory = await MEM.getChat();
+    
+    let fullContext = window._dashContext || '';
+    
+    if(profile && profile.summary){
+      fullContext = `[Profil]: ${profile.summary}\n`;
+    }
+    
+    if(chatHistory && chatHistory.length > 0){
+      const recent = chatHistory.slice(-20);
+      fullContext += `[Önceki Konuşmalar]:\n` + recent.map(m=>`${m.role==='user'?'Uğur':'Asistan'}: ${m.content||''}`).join('\n');
+    }
+    
+    if(!fullContext) fullContext = 'Uğur Çağlar, @ugurcaglar.wisrem, Wisrem Gayrimenkul Broker, Türkiye/Kıbrıs/Dubai';
 
     const prompt=
       `Sen Uğur Çağlar'ın (@ugurcaglar.wisrem) kişisel Instagram ve gayrimenkul asistanısın.\n`+
