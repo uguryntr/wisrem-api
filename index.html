@@ -388,8 +388,7 @@ async function doRival(){
     try{
       const ap=await fetch(`/api/instagram?action=apify&type=competitor&target=${encodeURIComponent(h)}`);
       const apd=await ap.json();
-      if(Array.isArray(apd)&&apd.length){
-        const p=apd[0];
+      if(apd){const arr=Array.isArray(apd)?apd:[apd];const p=arr[0];
         apifyData=`GERÇEK VERİ — Takipçi: ${p.followersCount||'?'}, Gönderi: ${p.postsCount||'?'}, Takip: ${p.followsCount||'?'}. `;
       }
     }catch(e){}
