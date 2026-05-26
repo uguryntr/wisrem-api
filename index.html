@@ -1016,7 +1016,7 @@ Yayın: [gün + saat]
 Neden: [neden viral olur - veriye dayalı]
 ---`);
 
-    const ideas=txt.split(/---+/).filter(s=>s.trim());
+    const ideas=txt.split(/----+/).filter(s=>s.trim());
     document.getElementById('ideas-out').innerHTML=
       (ideasData?`<div class="apify-box"><span class="apify-badge">● GERÇEK VERİ</span> ${ideasData.totalPosts} gönderi · ${ideasData.updatedAt}</div>`:'<div class="wrn" style="font-size:11px;margin-bottom:10px">⚠️ Gerçek veri yok — "Veriyi Güncelle" tıkla</div>')+
       ideas.map(idea=>{
@@ -1031,7 +1031,7 @@ Neden: [neden viral olur - veriye dayalı]
           if(l.startsWith('Neden:')) n=l.replace('Neden:','').trim();
         });
         if(!b) return '';
-        return `<div class="idea"><div class="idea-s">${s}</div><div class="idea-t">${b}</div><div class="idea-h">"${h}"</div>${n?`<div style="font-size:11px;color:var(--m);margin-bottom:7px">→ ${n}</div>`:''}<div class="tags"><span class="tag tag-g">🎬 ${f}</span><span class="tag" style="border-color:var(--gr);color:var(--gr)">📅 ${y}</span><button class="tag tag-a" onclick="toHook('${b.replace(/'/g,"\'")}')">Hook →</button></div></div>`;
+        return `<div class="idea"><div class="idea-t">${idea.trim().split('\n')[0].replace(/\*\*/g,'')}</div><div class="idea-h" style="margin-top:8px">${idea.trim().replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div><div class="tags"><button class="tag tag-a" onclick="toHook('${idea.trim().split('\n')[0].replace(/'/g,"\\'").replace(/\*\*/g,'')}')">Hook →</button></div></div>`;
       }).join('')||`<div class="res">${txt}</div>`;
   }catch(e){document.getElementById('ideas-out').innerHTML=`<div class="err">${e.message}</div>`;}
   btn.disabled=false;
