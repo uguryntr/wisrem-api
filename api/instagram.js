@@ -2,91 +2,91 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  Eğer `req.method` 'OPTIONS' ise `res.status(200).end();` döndürün.
+  if (req.method === 'OPTIONS') return res.status(200).end();
 
   const { endpoint, token, action, type, target } = req.query;
   const APIFY_TOKEN = process.env.APIFY_TOKEN;
 
   // ── APİFY YARDIMCI FONKSİYON ─────────────────────────
-  asenkron fonksiyon runApify(aktör, giriş) {
+  async function runApify(actor, input) {
     const startRes = await fetch(`https://api.apify.com/v2/acts/${actor}/runs`, {
-      yöntem: 'POST',
-      başlıklar: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${APIFY_TOKEN}` },
-      gövde: JSON.stringify(giriş)
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${APIFY_TOKEN}` },
+      body: JSON.stringify(input)
     });
-    const startData = startRes.json()'u bekliyor;
+    const startData = await startRes.json();
     const runId = startData.data?.id;
-    if (!runId) throw new Error('Çalıştırılamadı: ' + JSON.stringify(startData));
+    if (!runId) throw new Error('Run başlatılamadı: ' + JSON.stringify(startData));
 
     let status = 'RUNNING';
-    deneme sayısını 0'a indirelim;
+    let attempts = 0;
     while (status === 'RUNNING' && attempts < 40) {
       await new Promise(r => setTimeout(r, 2000));
       const statusRes = await fetch(`https://api.apify.com/v2/actor-runs/${runId}`, {
-        başlıklar: { 'Yetkilendirme': `Taşıyıcı ${APIFY_TOKEN}` }
+        headers: { 'Authorization': `Bearer ${APIFY_TOKEN}` }
       });
       const statusData = await statusRes.json();
-      durum = durumVerisi.verisi?.durum;
-      denemeler++;
+      status = statusData.data?.status;
+      attempts++;
     }
 
     const runRes = await fetch(`https://api.apify.com/v2/actor-runs/${runId}`, {
-      başlıklar: { 'Yetkilendirme': `Taşıyıcı ${APIFY_TOKEN}` }
+      headers: { 'Authorization': `Bearer ${APIFY_TOKEN}` }
     });
-    const runData = wait runRes.json();
+    const runData = await runRes.json();
     const datasetId = runData.data?.defaultDatasetId;
 
     const dataRes = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items`, {
-      başlıklar: { 'Yetkilendirme': `Taşıyıcı ${APIFY_TOKEN}` }
+      headers: { 'Authorization': `Bearer ${APIFY_TOKEN}` }
     });
     return await dataRes.json();
   }
 
-  // ──APİFY ────────────────────── ──────────────────────
+  // ── APİFY ────────────────────────────────────────────
   if (action === 'apify') {
-    Eğer (!APIFY_TOKEN) mevcut değilse, 'Apify token yok' şeklinde bir hata mesajı döndürün (500).
-    denemek {
-      Verileri bırak;
+    if (!APIFY_TOKEN) return res.status(500).json({ error: 'Apify token yok' });
+    try {
+      let data;
 
-      eğer (tür === 'rakip' ise) {
+      if (type === 'competitor') {
         data = await runApify('apify~instagram-profile-scraper', { usernames: [target], resultsLimit: 1 });
 
-      } aksi takdirde eğer (tür === 'hashtag') {
+      } else if (type === 'hashtag') {
         data = await runApify('apify~instagram-hashtag-scraper', { hashtags: [target], resultsLimit: 20 });
 
-      } aksi takdirde eğer (tür === 'kendi' ise) {
+      } else if (type === 'own') {
         data = await runApify('apify~instagram-profile-scraper', { usernames: ['ugurcaglar.wisrem'], resultsLimit: 1 });
 
-      } aksi takdirde eğer (type === 'youtube') {
-        // YouTube kazıyıcı - gayrimenkul araması
-        const anahtar kelimeler = hedef ? [hedef] : ['gayrimenkul', 'emlak', 'kıbrıs gayrimenkul', 'dubai gayrimenkul', 'yatırım'];
-        veri = await runApify('streamers~youtube-scraper', {
-          Arama terimleri: anahtar kelimeler,
+      } else if (type === 'youtube') {
+        // YouTube scraper - gayrimenkul araması
+        const keywords = target ? [target] : ['gayrimenkul', 'emlak', 'kıbrıs gayrimenkul', 'dubai gayrimenkul', 'yatırım'];
+        data = await runApify('streamers~youtube-scraper', {
+          searchTerms: keywords,
           maxResultsPerSearch: 10,
           maxVideosPerSearch: 10
         });
 
-      } aksi takdirde eğer (tür === 'tiktok') {
-        // TikTok kazıyıcı - gayrimenkul hashtagi
+      } else if (type === 'tiktok') {
+        // TikTok scraper - gayrimenkul hashtagi
         const hashtag = target || 'gayrimenkul';
-        veri = wait runApify('clockworks~tiktok-scraper', {
-          hashtagler: [hashtag],
-          Sayfa başına sonuç: 20
+        data = await runApify('clockworks~tiktok-scraper', {
+          hashtags: [hashtag],
+          resultsPerPage: 20
         });
 
-      } aksi takdirde eğer (tür === 'trendler') {
-        // Google Trends veri çekme aracı
+      } else if (type === 'trends') {
+        // Google Trends scraper
         const keyword = target || 'gayrimenkul';
-        veri = await runApify('apify~google-trends-scraper', {
-          Arama Şartları: [anahtar kelime, 'emlak', 'konut yatırım', 'kıbrıs gayrimenkul', 'dubai gayrimenkul'],
-          coğrafi: 'TR',
-          zaman aralığı: 'bugün 3 ay'
+        data = await runApify('apify~google-trends-scraper', {
+          searchTerms: [keyword, 'emlak', 'konut yatırım', 'kıbrıs gayrimenkul', 'dubai gayrimenkul'],
+          geo: 'TR',
+          timeRange: 'today 3-m'
         });
       }
 
-      res.status(200).json(data) değerini döndür;
-    } hata yakala {
-      res.status(500).json({ error: error.message });
+      return res.status(200).json(data);
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
     }
   }
 
@@ -96,31 +96,31 @@ export default async function handler(req, res) {
     const appId = process.env.FB_APP_ID;
     const appSecret = process.env.FB_APP_SECRET;
     const url = `https://graph.facebook.com/v19.0/oauth/access_token?grant_type=fb_exchange_token&client_id=${appId}&client_secret=${appSecret}&fb_exchange_token=${oldToken}`;
-    denemek {
+    try {
       const r = await fetch(url);
       const d = await r.json();
-      res.status(200).json(d) döndür;
-    } yakala (e) {
-      res.status(500).json({ error: e.message });
+      return res.status(200).json(d);
+    } catch (e) {
+      return res.status(500).json({ error: e.message });
     }
   }
 
-  // ── META GRAF API ────────────────────────────────────
-  const finalToken = belirteç || proses.env.IG_ACCESS_TOKEN;
+  // ── META GRAPH API ────────────────────────────────────
+  const finalToken = token || process.env.IG_ACCESS_TOKEN;
   if (!finalToken || !endpoint) {
-    return res.status(400).json({ error: 'Token ve uç nokta gerekli' });
+    return res.status(400).json({ error: 'Token ve endpoint gerekli' });
   }
 
-  denemek {
-    alanlar = '';
+  try {
+    let fields = '';
     if (endpoint.includes('media')) {
-      alanlar = '&alanlar=id,başlık,medya_türü,zaman_damgası,beğeni_sayısı,yorum_sayısı,erişim,gösterimler';
+      fields = '&fields=id,caption,media_type,timestamp,like_count,comments_count,reach,impressions';
     }
     const url = `https://graph.facebook.com/v19.0/${endpoint}${fields}&access_token=${finalToken}`;
     const response = await fetch(url);
     const data = await response.json();
-    res.status(200).json(data) değerini döndür;
-  } hata yakala {
-    res.status(500).json({ error: error.message });
+    return res.status(200).json(data);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
   }
 }
