@@ -78,7 +78,7 @@ export default async function handler(req, res) {
   }
 
   // ── META GRAPH API ────────────────────────────────────
-  const HARDCODED_TOKEN = 'EAAchKZCe2pa8BRpOuHmkYHrmtXc3qPifG2z1bmvgEJLj7fusy2qQP4Xhv66QhioIvRvzxYHZC2NSSLbf2nnvRZBG46WuyhLsrIZB5V27ib0zak9XB3Myp7qDAGhYWNpAPla2UEOvLJbXjqZArfnV6ye9wQg6AXv1GditBP1LUNl3GAZBC1ubNq3f0veaSkTMSg9A73w0ZAmnerZBYAZDZD';
+  const HARDCODED_TOKEN = 'EAAchKZCe2pa8BRk4sZC8dPVoGk5AA9o4ZAXLy6uScRQlWu7PFe0B5ShzgTBUdrZAsSug0YmLKJOkZBEShrPZAL8OzpXOI3k8l95bxpEjUVjQr2u52s3NzKwKmQ6ZAbrYoWtZBXSdzdi2HdTHzmhq3pykArrCXzVj74ZBqpbDCpeXNhoL82MfF6M0ZAARshrBdT60q2UZC2IntZAni6ZCXuoZCJeSZCSCaoLxVzYhTgt52EGKv8OYtF7FFN81fucQJB1c2PzG8GxUAKzB3eeO6uAcJaaO1ZCiYu0kgfZCDstgkiAZDZD';
 const finalToken = token || HARDCODED_TOKEN;
 
   if (!finalToken || !endpoint) {
