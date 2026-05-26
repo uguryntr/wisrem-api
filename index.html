@@ -366,14 +366,18 @@ const MEM={
 
 // ── SAYFA AÇILINCA OTOMATİK YÜKLE ───────────────────
 window.addEventListener('load', async()=>{
-  // Dashboard'a geçilince otomatik yükle
+  // Sayfa açılınca direkt cached dashboard yükle
+  setTimeout(async()=>{
+    await loadCachedDash();
+  }, 500);
+
+  // Dashboard tab tıklanınca cached yükle
   const dashTab = document.querySelectorAll('.tab')[1];
   if(dashTab){
     dashTab.addEventListener('click', async()=>{
-      // Kısa gecikme sonra cached'i yükle
       setTimeout(async()=>{
         const out = document.getElementById('dash-out');
-        if(out && out.innerHTML.includes('Verileri Yenile')){
+        if(out && (out.innerHTML.includes('Verileri Yenile') || out.innerHTML.includes('Henüz kayıtlı'))){
           await loadCachedDash();
         }
       }, 100);
@@ -684,7 +688,7 @@ async function loadDashboard(){
               </div>`).join('');
           })()}
         </div>
-        <div style="margin-top:10px;font-size:10px;color:var(--m);font-family:'DM Mono',monospace">Tamamlanan görevler bu oturumda kaydedilir.</div>
+        <div style="margin-top:10px;font-size:10px;color:var(--m);font-family:'DM Mono',monospace">💾 Görev durumları Upstash'e kaydediliyor — sayfa kapansa bile hatırlar.</div>
       </div>
 
       <!-- SORU-CEVAP -->
@@ -721,7 +725,12 @@ async function loadDashboard(){
 async function toggleTask(i){
   const box=document.getElementById('task-box-'+i);
   const text=document.getElementById('task-text-'+i);
-  const tasks=await MEM.getTasks();
+  let tasks=await MEM.getTasks();
+  // tasks array yoksa veya boşsa, DOM'dan oluştur
+  if(!tasks||tasks.length===0){
+    const rows=document.querySelectorAll('.task-row');
+    tasks=Array.from(rows).map(r=>({text:r.querySelector('[id^=task-text]')?.textContent||'',done:false}));
+  }
   const isDone=box.innerHTML==='✓';
   if(isDone){
     box.innerHTML='';
@@ -738,7 +747,8 @@ async function toggleTask(i){
     box.style.color='#fff';
     text.style.textDecoration='line-through';
     text.style.color='var(--m)';
-    if(tasks[i]) tasks[i].done=true;
+    if(!tasks[i]) tasks[i]={text:text.textContent,done:true};
+    else tasks[i].done=true;
   }
   await MEM.saveTasks(tasks);
 }
