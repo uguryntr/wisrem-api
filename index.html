@@ -376,9 +376,9 @@ const MEM={
 
 // ── SAYFA AÇILINCA OTOMATİK YÜKLE ───────────────────
 window.addEventListener('load', async()=>{
+  // Sayfa açılınca direkt cached dashboard yükle
   setTimeout(async()=>{
     await loadCachedDash();
-    await checkIdeasDataStatus();
   }, 500);
 
   // Dashboard tab tıklanınca cached yükle
@@ -883,13 +883,18 @@ async function askDash(){
 
 // Veri durumunu göster
 async function checkIdeasDataStatus(){
-  const data = await MEM.get('ideas_data');
-  const statusEl = document.getElementById('ideas-data-status');
-  if(!statusEl) return;
-  if(data && data.updatedAt){
-    statusEl.innerHTML = `<span style="color:var(--gr)">✅ Son güncelleme: ${data.updatedAt}</span> — ${data.totalPosts||0} gönderi analiz edildi`;
-  } else {
-    statusEl.innerHTML = '<span style="color:var(--r)">⚠️ Henüz veri yok — "Veriyi Güncelle" tıkla</span>';
+  try{
+    const data = await MEM.get('ideas_data');
+    const statusEl = document.getElementById('ideas-data-status');
+    if(!statusEl) return;
+    if(data && data.updatedAt){
+      statusEl.innerHTML = `<span style="color:var(--gr)">✅ Son güncelleme: ${data.updatedAt}</span> — ${data.totalPosts||0} gönderi analiz edildi`;
+    } else {
+      statusEl.innerHTML = '<span style="color:var(--r)">⚠️ Henüz veri yok — "Veriyi Güncelle" tıkla</span>';
+    }
+  }catch(e){
+    const statusEl = document.getElementById('ideas-data-status');
+    if(statusEl) statusEl.innerHTML = '<span style="color:var(--r)">⚠️ Veri durumu alınamadı</span>';
   }
 }
 
@@ -1016,23 +1021,31 @@ Yayın: [gün + saat]
 Neden: [neden viral olur - veriye dayalı]
 ---`);
 
-    const ideas=txt.split(/----+/).filter(s=>s.trim());
-    document.getElementById('ideas-out').innerHTML=
-      (ideasData?`<div class="apify-box"><span class="apify-badge">● GERÇEK VERİ</span> ${ideasData.totalPosts} gönderi · ${ideasData.updatedAt}</div>`:'<div class="wrn" style="font-size:11px;margin-bottom:10px">⚠️ Gerçek veri yok — "Veriyi Güncelle" tıkla</div>')+
-      ideas.map(idea=>{
+    // AI cevabını --- veya ---- ile böl
+    const ideas=txt.split(/\n?-{2,}\n?/).filter(s=>s.trim().length>10);
+    const badge = ideasData ? `<div class="apify-box"><span class="apify-badge">● GERÇEK VERİ</span> ${ideasData.totalPosts} gönderi · ${ideasData.updatedAt}</div>` : '<div class="wrn" style="font-size:11px;margin-bottom:10px">⚠️ Gerçek veri yok</div>';
+    
+    if(ideas.length===0){
+      // Parse başarısız — raw metni göster
+      document.getElementById('ideas-out').innerHTML = badge + `<div class="res">${txt.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div>`;
+    } else {
+      document.getElementById('ideas-out').innerHTML = badge + ideas.map(idea=>{
         const lines=idea.trim().split('\n').filter(l=>l.trim());
         let s='',b='',h='',f='',y='',n='';
         lines.forEach(l=>{
-          if(l.startsWith('Seri:')) s=l.replace('Seri:','').trim();
-          if(l.startsWith('Başlık:')) b=l.replace('Başlık:','').trim();
-          if(l.startsWith('Hook:')) h=l.replace('Hook:','').trim();
-          if(l.startsWith('Format:')) f=l.replace('Format:','').trim();
-          if(l.startsWith('Yayın:')) y=l.replace('Yayın:','').trim();
-          if(l.startsWith('Neden:')) n=l.replace('Neden:','').trim();
+          if(l.match(/^Seri:/i)) s=l.replace(/^Seri:/i,'').trim();
+          if(l.match(/^Başlık:/i)) b=l.replace(/^Başlık:/i,'').trim();
+          if(l.match(/^Hook:/i)) h=l.replace(/^Hook:/i,'').trim();
+          if(l.match(/^Format:/i)) f=l.replace(/^Format:/i,'').trim();
+          if(l.match(/^Yayın:/i)) y=l.replace(/^Yayın:/i,'').trim();
+          if(l.match(/^Neden:/i)) n=l.replace(/^Neden:/i,'').trim();
         });
+        // Başlık bulunamadıysa ilk satırı başlık yap
+        if(!b) b=lines[0]?.replace(/\*\*/g,'')||'';
         if(!b) return '';
-        return `<div class="idea"><div class="idea-t">${idea.trim().split('\n')[0].replace(/\*\*/g,'')}</div><div class="idea-h" style="margin-top:8px">${idea.trim().replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div><div class="tags"><button class="tag tag-a" onclick="toHook('${idea.trim().split('\n')[0].replace(/'/g,"\\'").replace(/\*\*/g,'')}')">Hook →</button></div></div>`;
-      }).join('')||`<div class="res">${txt}</div>`;
+        return `<div class="idea"><div class="idea-s">${s||'İçerik'}</div><div class="idea-t">${b}</div>${h?`<div class="idea-h">"${h}"</div>`:''}<div style="font-size:11px;color:var(--m);margin-bottom:7px;line-height:1.6">${idea.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/^.*<br>/,'')}</div><div class="tags"><span class="tag tag-g">🎬 ${f||'Reels'}</span><span class="tag" style="border-color:var(--gr);color:var(--gr)">📅 ${y||'Haftaiçi 18:00'}</span><button class="tag tag-a" onclick="toHook('${b.replace(/'/g,"\\'")}')">Hook →</button></div></div>`;
+      }).join('');
+    }
   }catch(e){document.getElementById('ideas-out').innerHTML=`<div class="err">${e.message}</div>`;}
   btn.disabled=false;
 }
