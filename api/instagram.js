@@ -78,7 +78,8 @@ export default async function handler(req, res) {
   }
 
   // ── META GRAPH API ────────────────────────────────────
-  const finalToken = token || process.env.IG_ACCESS_TOKEN;
+  const HARDCODED_TOKEN = 'EAAchKZCe2pa8BRpOuHmkYHrmtXc3qPifG2z1bmvgEJLj7fusy2qQP4Xhv66QhioIvRvzxYHZC2NSSLbf2nnvRZBG46WuyhLsrIZB5V27ib0zak9XB3Myp7qDAGhYWNpAPla2UEOvLJbXjqZArfnV6ye9wQg6AXv1GditBP1LUNl3GAZBC1ubNq3f0veaSkTMSg9A73w0ZAmnerZBYAZDZD';
+const finalToken = token || HARDCODED_TOKEN;
 
   if (!finalToken || !endpoint) {
     return res.status(400).json({ error: 'Token ve endpoint gerekli' });
