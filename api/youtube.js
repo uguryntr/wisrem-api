@@ -8,30 +8,29 @@ export default async function handler(req, res) {
   const APIFY_TOKEN = process.env.APIFY_TOKEN;
   if (!APIFY_TOKEN) return res.status(500).json({ error: 'Apify token yok' });
 
-  const { type, target } = req.query;
+  const { type } = req.query;
 
   try {
     let actor = '';
     let input = {};
 
     if (type === 'youtube') {
-      // Daha hızlı ve güvenilir YouTube actor
-      actor = 'h7LD4qFPSFxgNXxhk'; // apify/youtube-scraper
-      const keywords = target ? [target] : ['gayrimenkul', 'emlak yatırım', 'tapu hukuku', 'kıbrıs gayrimenkul', 'dubai yatırım'];
+      actor = 'streamers~youtube-scraper';
       input = {
-        searchKeywords: keywords,
-        maxResults: 10,
-        type: 'video',
-        dateFilter: 'month'
+        searchKeywords: 'gayrimenkul',
+        maxResults: 8,
+        maxResultStreams: 0,
+        maxResultsShorts: 0
       };
     } else if (type === 'trends') {
-      actor = 'apify-google-trends-scraper';
+      actor = 'apify~google-trends-scraper';
       input = {
-        searchTerms: ['gayrimenkul', 'emlak', 'tapu', 'konut yatırım', 'kıbrıs gayrimenkul'],
-        geo: 'TR'
+        searchTerms: ['gayrimenkul', 'emlak', 'tapu'],
+        geo: 'TR',
+        timeRange: 'now 7-d'
       };
     } else {
-      return res.status(400).json({ error: 'type parametresi gerekli: youtube veya trends' });
+      return res.status(400).json({ error: 'type parametresi gerekli' });
     }
 
     // Run başlat
@@ -48,7 +47,7 @@ export default async function handler(req, res) {
     const runId = startData.data?.id;
     if (!runId) return res.status(500).json({ error: 'Run başlatılamadı', details: startData });
 
-    // Max 200 saniye bekle (Vercel Pro 300s limit var)
+    // Max 200 saniye bekle
     let status = 'RUNNING';
     let attempts = 0;
     while (status === 'RUNNING' && attempts < 80) {
@@ -67,10 +66,9 @@ export default async function handler(req, res) {
     });
     const runData = await runRes.json();
     const datasetId = runData.data?.defaultDatasetId;
-
     if (!datasetId) return res.status(500).json({ error: 'Dataset bulunamadı' });
 
-    const dataRes = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?limit=20`, {
+    const dataRes = await fetch(`https://api.apify.com/v2/datasets/${datasetId}/items?limit=15`, {
       headers: { 'Authorization': `Bearer ${APIFY_TOKEN}` }
     });
     const data = await dataRes.json();
