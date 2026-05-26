@@ -6,21 +6,6 @@ export default async function handler(req, res) {
 
   const { endpoint, token, action, type, target } = req.query;
 
-  // ── TOKEN UZATMA ──────────────────────────────────────
-  if (action === 'refresh_token') {
-    const oldToken = process.env.IG_ACCESS_TOKEN;
-    const appId = process.env.FB_APP_ID;
-    const appSecret = process.env.FB_APP_SECRET;
-    const url = `https://graph.facebook.com/v19.0/oauth/access_token?grant_type=fb_exchange_token&client_id=${appId}&client_secret=${appSecret}&fb_exchange_token=${oldToken}`;
-    try {
-      const r = await fetch(url);
-      const d = await r.json();
-      return res.status(200).json(d);
-    } catch (e) {
-      return res.status(500).json({ error: e.message });
-    }
-  }
-
   // ── APİFY ────────────────────────────────────────────
   if (action === 'apify') {
     const APIFY_TOKEN = process.env.APIFY_TOKEN;
@@ -36,6 +21,16 @@ export default async function handler(req, res) {
       } else if (type === 'hashtag') {
         actor = 'apify~instagram-hashtag-scraper';
         input = { hashtags: [target], resultsLimit: 20 };
+      } else if (type === 'own') {
+        actor = 'apify~instagram-profile-scraper';
+        input = { usernames: ['ugurcaglar.wisrem'], resultsLimit: 1 };
+      } else if (type === 'own_posts') {
+        actor = 'apify~instagram-scraper';
+        input = { 
+          directUrls: ['https://www.instagram.com/ugurcaglar.wisrem/'],
+          resultsType: 'posts',
+          resultsLimit: 12
+        };
       }
 
       const startRes = await fetch(`https://api.apify.com/v2/acts/${actor}/runs`, {
@@ -77,9 +72,23 @@ export default async function handler(req, res) {
     }
   }
 
+  // ── TOKEN UZATMA ──────────────────────────────────────
+  if (action === 'refresh_token') {
+    const oldToken = process.env.IG_ACCESS_TOKEN;
+    const appId = process.env.FB_APP_ID;
+    const appSecret = process.env.FB_APP_SECRET;
+    const url = `https://graph.facebook.com/v19.0/oauth/access_token?grant_type=fb_exchange_token&client_id=${appId}&client_secret=${appSecret}&fb_exchange_token=${oldToken}`;
+    try {
+      const r = await fetch(url);
+      const d = await r.json();
+      return res.status(200).json(d);
+    } catch (e) {
+      return res.status(500).json({ error: e.message });
+    }
+  }
+
   // ── META GRAPH API ────────────────────────────────────
-  const HARDCODED_TOKEN = 'EAAchKZCe2pa8BRk4sZC8dPVoGk5AA9o4ZAXLy6uScRQlWu7PFe0B5ShzgTBUdrZAsSug0YmLKJOkZBEShrPZAL8OzpXOI3k8l95bxpEjUVjQr2u52s3NzKwKmQ6ZAbrYoWtZBXSdzdi2HdTHzmhq3pykArrCXzVj74ZBqpbDCpeXNhoL82MfF6M0ZAARshrBdT60q2UZC2IntZAni6ZCXuoZCJeSZCSCaoLxVzYhTgt52EGKv8OYtF7FFN81fucQJB1c2PzG8GxUAKzB3eeO6uAcJaaO1ZCiYu0kgfZCDstgkiAZDZD';
-const finalToken = token || HARDCODED_TOKEN;
+  const finalToken = token || process.env.IG_ACCESS_TOKEN;
 
   if (!finalToken || !endpoint) {
     return res.status(400).json({ error: 'Token ve endpoint gerekli' });
