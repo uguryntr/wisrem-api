@@ -376,9 +376,9 @@ const MEM={
 
 // ── SAYFA AÇILINCA OTOMATİK YÜKLE ───────────────────
 window.addEventListener('load', async()=>{
-  // Sayfa açılınca direkt cached dashboard yükle
   setTimeout(async()=>{
     await loadCachedDash();
+    await checkIdeasDataStatus();
   }, 500);
 
   // Dashboard tab tıklanınca cached yükle
