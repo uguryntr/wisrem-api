@@ -172,7 +172,17 @@ textarea{resize:vertical;min-height:80px}
 <!-- FİKİRLER -->
 <div class="pnl" id="pnl-ideas">
   <div class="ttl">İçerik Fikir Üreteci</div>
-  <div class="sub">// GAYRİMENKUL · YATIRIM · HUKUK · PROJE</div>
+  <div class="sub">// GERÇEK VERİ · VİRAL ANALİZ · KİŞİSEL MARKA</div>
+
+  <!-- VERİ GÜNCELLEME KARTI -->
+  <div class="card" style="border-left:4px solid var(--g);margin-bottom:14px">
+    <div class="lbl">📡 Instagram Veri Kaynağı</div>
+    <div id="ideas-data-status" style="font-size:12px;color:var(--m);margin-bottom:12px">Veri durumu kontrol ediliyor...</div>
+    <button class="btn btn-d" onclick="updateIdeasData()" id="btn-update-data" style="margin-right:8px">🔄 Veriyi Güncelle (~60sn)</button>
+    <span style="font-size:10px;color:var(--m);font-family:'DM Mono',monospace">Haftada 1 güncelleme yeterli</span>
+  </div>
+
+  <!-- FİKİR ÜRETME KARTI -->
   <div class="card">
     <div class="sf">
       <button class="sb active" onclick="setSer(this,'all')">Tümü</button>
@@ -870,40 +880,159 @@ async function askDash(){
 }
 
 // ── FİKİRLER ─────────────────────────────────────────
+
+// Veri durumunu göster
+async function checkIdeasDataStatus(){
+  const data = await MEM.get('ideas_data');
+  const statusEl = document.getElementById('ideas-data-status');
+  if(!statusEl) return;
+  if(data && data.updatedAt){
+    statusEl.innerHTML = `<span style="color:var(--gr)">✅ Son güncelleme: ${data.updatedAt}</span> — ${data.totalPosts||0} gönderi analiz edildi`;
+  } else {
+    statusEl.innerHTML = '<span style="color:var(--r)">⚠️ Henüz veri yok — "Veriyi Güncelle" tıkla</span>';
+  }
+}
+
+// Apify ile Instagram verisi çek ve Upstash'e kaydet
+async function updateIdeasData(){
+  const btn = document.getElementById('btn-update-data');
+  const statusEl = document.getElementById('ideas-data-status');
+  btn.disabled = true;
+  btn.textContent = '⏳ Taranıyor...';
+
+  const hashtags = [
+    'gayrimenkul','emlak','konut',
+    'kıbrısgayrimenkul','kıbrıs',
+    'dubaigayrimenkul','dubai',
+    'yatırım','tapu','evalmak',
+    'gayrimenkulokulu','emlakipuçları'
+  ];
+
+  let allPosts = [];
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate()-30);
+
+  for(const tag of hashtags){
+    try{
+      statusEl.innerHTML = `🔍 #${tag} taranıyor... (${hashtags.indexOf(tag)+1}/${hashtags.length})`;
+      const r = await fetch(`/api/instagram?action=apify&type=hashtag&target=${encodeURIComponent(tag)}`);
+      const posts = await r.json();
+      if(Array.isArray(posts)){
+        // Sadece video/reels formatını al, son 30 gün
+        const filtered = posts.filter(p=>{
+          const isVideo = (p.type||p.mediaType||'').toLowerCase().includes('video') || p.isVideo;
+          const isRecent = !p.timestamp || new Date(p.timestamp) > thirtyDaysAgo;
+          return isVideo && isRecent;
+        });
+        // Etkileşim oranına göre sırala (beğeni + yorum)
+        const sorted = filtered.sort((a,b)=>{
+          const engA = (a.likesCount||0) + (a.commentsCount||0)*2;
+          const engB = (b.likesCount||0) + (b.commentsCount||0)*2;
+          return engB - engA;
+        });
+        allPosts = allPosts.concat(sorted.slice(0,8));
+      }
+    }catch(e){ console.log('Hashtag hata:', tag, e); }
+  }
+
+  // Kendi hesabını da ekle — neyin tuttuğunu görmek için
+  try{
+    statusEl.innerHTML = '👤 Kendi hesabın analiz ediliyor...';
+    const r = await fetch('/api/instagram?action=apify&type=competitor&target=ugurcaglar.wisrem');
+    const raw = await r.json();
+    const profile = Array.isArray(raw) ? raw[0] : raw;
+    if(profile && profile.latestPosts){
+      allPosts = allPosts.concat(profile.latestPosts);
+    }
+  }catch(e){ console.log('Kendi hesap hata:', e); }
+
+  // Duplikatları temizle
+  const seen = new Set();
+  const uniquePosts = allPosts.filter(p=>{
+    const id = p.id || p.shortCode || p.caption;
+    if(seen.has(id)) return false;
+    seen.add(id);
+    return true;
+  });
+
+  const saveData = {
+    posts: uniquePosts,
+    totalPosts: uniquePosts.length,
+    updatedAt: new Date().toLocaleString('tr-TR')
+  };
+  await MEM.set('ideas_data', saveData);
+  statusEl.innerHTML = `<span style="color:var(--gr)">✅ Güncellendi: ${saveData.updatedAt}</span> — ${uniquePosts.length} video analiz edildi`;
+  btn.disabled = false;
+  btn.textContent = '🔄 Veriyi Güncelle (~60sn)';
+}
+
 async function genIdeas(){
   const cnt=document.getElementById('i-cnt').value;
   const loc=document.getElementById('i-loc').value;
   const note=document.getElementById('i-note').value;
   const btn=document.getElementById('btn-ideas');
-  btn.disabled=true; ld('ideas-out');
+  btn.disabled=true; ld('ideas-out','Viral veriler analiz ediliyor...');
   const sm={all:'karma',egitim:'Gayrimenkul Okulu',proje:'Proje Tanıtım',yatirim:'Yatırım Analizi',hukuk:'Gayrimenkul Hukuku',tapu:'Tapu Bilgileri'};
   const lm={genel:'Türkiye',kibris:'Kıbrıs',dubai:'Dubai',istanbul:'İstanbul'};
   try{
-    const txt=await ai(`Sen @ugurcaglar.wisrem için gayrimenkul içerik stratejistisisin. Uğur Çağlar, Wisrem Broker, 16.400+ takipçi, Türkiye/Kıbrıs/Dubai. ${cnt} video fikri üret. Seri: ${sm[SER]}, Lokasyon: ${lm[loc]}. ${note?'Not: '+note:''}
-Her fikir için:
+    const ideasData = await MEM.get('ideas_data');
+    let viralContext = '';
+    if(ideasData && ideasData.posts && ideasData.posts.length > 0){
+      const sorted = [...ideasData.posts].filter(p=>p.likesCount||p.diggCount).sort((a,b)=>(b.likesCount||b.diggCount||0)-(a.likesCount||a.diggCount||0)).slice(0,10);
+      viralContext = `\n\nGERÇEK INSTAGRAM VERİSİ (${ideasData.updatedAt}):\nToplam analiz: ${ideasData.totalPosts} gönderi\n\nEN VİRAL 10 GÖNDERI:\n`;
+      sorted.forEach((p,i)=>{
+        const cap=(p.caption||p.desc||'').substring(0,80);
+        const likes=p.likesCount||p.diggCount||0;
+        const comments=p.commentsCount||p.commentCount||0;
+        const type=p.type||p.mediaType||'video';
+        viralContext+=`${i+1}. [${type.toUpperCase()}] "${cap}" — ❤️${likes} 💬${comments}\n`;
+      });
+      if(ideasData.profiles&&ideasData.profiles.length>0){
+        viralContext+=`\nRAKİP HESAPLAR:\n`;
+        ideasData.profiles.forEach(p=>{ viralContext+=`@${p.username}: ${(p.followers||0).toLocaleString('tr')} takipçi\n`; });
+      }
+    } else {
+      viralContext = '\n\nNOT: Gerçek veri yok, genel bilgiden üretiliyor. "Veriyi Güncelle" tıkla.';
+    }
+    const ownProfile = await MEM.getProfile();
+    const ownContext = ownProfile ? `\n\nKENDİ HESABIM: ${ownProfile.summary}` : '';
+
+    const txt=await ai(`Sen @ugurcaglar.wisrem için uzman gayrimenkul içerik stratejistisisin.
+KİŞİ: Uğur Çağlar, Wisrem Gayrimenkul Broker
+KARAKTERİ: Eğitici, storytelling, analitik, güvenilir. Abartısız, gerçekçi.
+PAZARLAR: Türkiye, Kıbrıs, Dubai
+${ownContext}${viralContext}
+
+Yukarıdaki GERÇEK viral veriyi analiz et. Uğur'un karakterine uygun ${cnt} video fikri üret.
+Seri: ${sm[SER]}, Lokasyon: ${lm[loc]}. ${note?'Not: '+note:''}
+
+Her fikir için TAM OLARAK:
 FİKİR [n]
 Seri: [seri]
 Başlık: [başlık]
 Hook: [ilk 3 saniye]
 Format: Reels [süre]
 Yayın: [gün + saat]
-Neden: [kısa gerekçe]
+Neden: [neden viral olur - veriye dayalı]
 ---`);
+
     const ideas=txt.split('---').filter(s=>s.trim());
-    document.getElementById('ideas-out').innerHTML=ideas.map(idea=>{
-      const lines=idea.trim().split('\n').filter(l=>l.trim());
-      let s='',b='',h='',f='',y='',n='';
-      lines.forEach(l=>{
-        if(l.startsWith('Seri:')) s=l.replace('Seri:','').trim();
-        if(l.startsWith('Başlık:')) b=l.replace('Başlık:','').trim();
-        if(l.startsWith('Hook:')) h=l.replace('Hook:','').trim();
-        if(l.startsWith('Format:')) f=l.replace('Format:','').trim();
-        if(l.startsWith('Yayın:')) y=l.replace('Yayın:','').trim();
-        if(l.startsWith('Neden:')) n=l.replace('Neden:','').trim();
-      });
-      if(!b) return '';
-      return `<div class="idea"><div class="idea-s">${s}</div><div class="idea-t">${b}</div><div class="idea-h">"${h}"</div>${n?`<div style="font-size:11px;color:var(--m);margin-bottom:7px">→ ${n}</div>`:''}<div class="tags"><span class="tag tag-g">🎬 ${f}</span><span class="tag" style="border-color:var(--gr);color:var(--gr)">📅 ${y}</span><button class="tag tag-a" onclick="toHook('${b.replace(/'/g,"\\'")}')">Hook →</button></div></div>`;
-    }).join('')||`<div class="res">${txt}</div>`;
+    document.getElementById('ideas-out').innerHTML=
+      (ideasData?`<div class="apify-box"><span class="apify-badge">● GERÇEK VERİ</span> ${ideasData.totalPosts} gönderi · ${ideasData.updatedAt}</div>`:'<div class="wrn" style="font-size:11px;margin-bottom:10px">⚠️ Gerçek veri yok — "Veriyi Güncelle" tıkla</div>')+
+      ideas.map(idea=>{
+        const lines=idea.trim().split('\n').filter(l=>l.trim());
+        let s='',b='',h='',f='',y='',n='';
+        lines.forEach(l=>{
+          if(l.startsWith('Seri:')) s=l.replace('Seri:','').trim();
+          if(l.startsWith('Başlık:')) b=l.replace('Başlık:','').trim();
+          if(l.startsWith('Hook:')) h=l.replace('Hook:','').trim();
+          if(l.startsWith('Format:')) f=l.replace('Format:','').trim();
+          if(l.startsWith('Yayın:')) y=l.replace('Yayın:','').trim();
+          if(l.startsWith('Neden:')) n=l.replace('Neden:','').trim();
+        });
+        if(!b) return '';
+        return `<div class="idea"><div class="idea-s">${s}</div><div class="idea-t">${b}</div><div class="idea-h">"${h}"</div>${n?`<div style="font-size:11px;color:var(--m);margin-bottom:7px">→ ${n}</div>`:''}<div class="tags"><span class="tag tag-g">🎬 ${f}</span><span class="tag" style="border-color:var(--gr);color:var(--gr)">📅 ${y}</span><button class="tag tag-a" onclick="toHook('${b.replace(/'/g,"\'")}')">Hook →</button></div></div>`;
+      }).join('')||`<div class="res">${txt}</div>`;
   }catch(e){document.getElementById('ideas-out').innerHTML=`<div class="err">${e.message}</div>`;}
   btn.disabled=false;
 }
