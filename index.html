@@ -905,70 +905,112 @@ async function updateIdeasData(){
   btn.disabled = true;
   btn.textContent = '⏳ Taranıyor...';
 
-  const hashtags = [
-    'gayrimenkul','emlak','konut',
-    'kıbrısgayrimenkul','kıbrıs',
-    'dubaigayrimenkul','dubai',
-    'yatırım','tapu','evalmak',
-    'gayrimenkulokulu','emlakipuçları'
-  ];
+  let youtubeData = [];
+  let tiktokData = [];
+  let instagramData = [];
 
-  let allPosts = [];
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate()-30);
-
-  for(const tag of hashtags){
-    try{
-      statusEl.innerHTML = `🔍 #${tag} taranıyor... (${hashtags.indexOf(tag)+1}/${hashtags.length})`;
-      const r = await fetch(`/api/instagram?action=apify&type=hashtag&target=${encodeURIComponent(tag)}`);
-      const posts = await r.json();
-      if(Array.isArray(posts)){
-        // Sadece video/reels formatını al, son 30 gün
-        const filtered = posts.filter(p=>{
-          const isVideo = (p.type||p.mediaType||'').toLowerCase().includes('video') || p.isVideo;
-          const isRecent = !p.timestamp || new Date(p.timestamp) > thirtyDaysAgo;
-          return isVideo && isRecent;
-        });
-        // Etkileşim oranına göre sırala (beğeni + yorum)
-        const sorted = filtered.sort((a,b)=>{
-          const engA = (a.likesCount||0) + (a.commentsCount||0)*2;
-          const engB = (b.likesCount||0) + (b.commentsCount||0)*2;
-          return engB - engA;
-        });
-        allPosts = allPosts.concat(sorted.slice(0,8));
-      }
-    }catch(e){ console.log('Hashtag hata:', tag, e); }
-  }
-
-  // Kendi hesabını da ekle — neyin tuttuğunu görmek için
+  // 1. YouTube verisi
   try{
-    statusEl.innerHTML = '👤 Kendi hesabın analiz ediliyor...';
-    const r = await fetch('/api/instagram?action=apify&type=competitor&target=ugurcaglar.wisrem');
+    statusEl.innerHTML = '🎬 YouTube gayrimenkul videoları çekiliyor...';
+    const r = await fetch('/api/instagram?action=apify&type=youtube');
+    const data = await r.json();
+    if(Array.isArray(data)){
+      youtubeData = data.map(v=>({
+        source: 'youtube',
+        title: v.title||'',
+        caption: v.title||'',
+        views: v.viewCount||0,
+        likes: v.likes||0,
+        comments: v.commentsCount||0,
+        duration: v.duration||'',
+        url: v.url||'',
+        channel: v.channelName||'',
+        publishedAt: v.date||''
+      })).filter(v=>v.title);
+    }
+    statusEl.innerHTML = `✅ YouTube: ${youtubeData.length} video`;
+  }catch(e){ console.log('YouTube hata:', e); }
+
+  // 2. TikTok verisi
+  try{
+    statusEl.innerHTML = '📱 TikTok gayrimenkul içerikleri çekiliyor...';
+    const r = await fetch('/api/instagram?action=apify&type=tiktok&target=gayrimenkul');
+    const data = await r.json();
+    if(Array.isArray(data)){
+      tiktokData = data.map(v=>({
+        source: 'tiktok',
+        title: (v.text||v.desc||'').substring(0,100),
+        caption: v.text||v.desc||'',
+        views: v.playCount||v.plays||0,
+        likes: v.diggCount||v.likes||0,
+        comments: v.commentCount||v.comments||0,
+        shares: v.shareCount||0,
+        author: v.authorMeta?.name||v.author||''
+      })).filter(v=>v.caption);
+    }
+    statusEl.innerHTML = `✅ TikTok: ${tiktokData.length} video`;
+  }catch(e){ console.log('TikTok hata:', e); }
+
+  // 3. Kendi Instagram hesabı
+  try{
+    statusEl.innerHTML = '📸 Kendi Instagram hesabın analiz ediliyor...';
+    const r = await fetch('/api/instagram?action=apify&type=own');
     const raw = await r.json();
     const profile = Array.isArray(raw) ? raw[0] : raw;
     if(profile && profile.latestPosts){
-      allPosts = allPosts.concat(profile.latestPosts);
+      instagramData = profile.latestPosts.map(p=>({
+        source: 'instagram_own',
+        caption: p.caption||'',
+        likes: p.likesCount||0,
+        comments: p.commentsCount||0,
+        type: p.type||'video',
+        timestamp: p.timestamp||''
+      }));
     }
-  }catch(e){ console.log('Kendi hesap hata:', e); }
+    statusEl.innerHTML = `✅ Instagram: ${instagramData.length} gönderi`;
+  }catch(e){ console.log('Instagram hata:', e); }
 
-  // Duplikatları temizle
-  const seen = new Set();
-  const uniquePosts = allPosts.filter(p=>{
-    const id = p.id || p.shortCode || p.caption;
-    if(seen.has(id)) return false;
-    seen.add(id);
-    return true;
-  });
+  // 4. Google Trends
+  let trendsData = { rising: [], top: [] };
+  try{
+    statusEl.innerHTML = '📈 Google Trends analiz ediliyor...';
+    const r = await fetch('/api/instagram?action=apify&type=trends');
+    const data = await r.json();
+    if(Array.isArray(data) && data.length > 0){
+      const d = data[0];
+      trendsData.rising = (d.relatedQueriesRising||[]).slice(0,10);
+      trendsData.top = (d.relatedQueriesTop||[]).slice(0,10);
+      trendsData.interestOverTime = d.interestOverTime_averages||[];
+    }
+    statusEl.innerHTML = `✅ Google Trends: ${trendsData.rising.length} yükselen konu`;
+  }catch(e){ console.log('Trends hata:', e); }
+
+  // En viral içerikleri belirle
+  const allContent = [...youtubeData, ...tiktokData, ...instagramData];
+  
+  // YouTube'u görüntülemeye göre sırala
+  const topYoutube = [...youtubeData].sort((a,b)=>b.views-a.views).slice(0,5);
+  // TikTok'u görüntülemeye göre sırala
+  const topTiktok = [...tiktokData].sort((a,b)=>b.views-a.views).slice(0,5);
+  // Instagram'ı etkileşime göre sırala
+  const topInstagram = [...instagramData].sort((a,b)=>(b.likes+b.comments)-(a.likes+a.comments)).slice(0,5);
 
   const saveData = {
-    posts: uniquePosts,
-    totalPosts: uniquePosts.length,
+    youtube: youtubeData,
+    tiktok: tiktokData,
+    instagram: instagramData,
+    trends: trendsData,
+    topYoutube,
+    topTiktok,
+    topInstagram,
+    totalContent: allContent.length,
     updatedAt: new Date().toLocaleString('tr-TR')
   };
+  
   await MEM.set('ideas_data', saveData);
-  statusEl.innerHTML = `<span style="color:var(--gr)">✅ Güncellendi: ${saveData.updatedAt}</span> — ${uniquePosts.length} video analiz edildi`;
+  statusEl.innerHTML = `<span style="color:var(--gr)">✅ Güncellendi: ${saveData.updatedAt}</span> — YouTube: ${youtubeData.length} · TikTok: ${tiktokData.length} · Instagram: ${instagramData.length} · Trends: ${trendsData.rising.length}`;
   btn.disabled = false;
-  btn.textContent = '🔄 Veriyi Güncelle (~60sn)';
+  btn.textContent = '🔄 Veriyi Güncelle (~3-4dk)';
 }
 
 async function genIdeas(){
@@ -982,19 +1024,50 @@ async function genIdeas(){
   try{
     const ideasData = await MEM.get('ideas_data');
     let viralContext = '';
-    if(ideasData && ideasData.posts && ideasData.posts.length > 0){
-      const sorted = [...ideasData.posts].filter(p=>p.likesCount||p.diggCount).sort((a,b)=>(b.likesCount||b.diggCount||0)-(a.likesCount||a.diggCount||0)).slice(0,10);
-      viralContext = `\n\nGERÇEK INSTAGRAM VERİSİ (${ideasData.updatedAt}):\nToplam analiz: ${ideasData.totalPosts} gönderi\n\nEN VİRAL 10 GÖNDERI:\n`;
-      sorted.forEach((p,i)=>{
-        const cap=(p.caption||p.desc||'').substring(0,80);
-        const likes=p.likesCount||p.diggCount||0;
-        const comments=p.commentsCount||p.commentCount||0;
-        const type=p.type||p.mediaType||'video';
-        viralContext+=`${i+1}. [${type.toUpperCase()}] "${cap}" — ❤️${likes} 💬${comments}\n`;
-      });
-      if(ideasData.profiles&&ideasData.profiles.length>0){
-        viralContext+=`\nRAKİP HESAPLAR:\n`;
-        ideasData.profiles.forEach(p=>{ viralContext+=`@${p.username}: ${(p.followers||0).toLocaleString('tr')} takipçi\n`; });
+    if(ideasData && ideasData.updatedAt){
+      viralContext = `\n\n═══ GERÇEK VİRAL VERİSİ (${ideasData.updatedAt}) ═══\n`;
+
+      // YouTube verisi
+      if(ideasData.topYoutube && ideasData.topYoutube.length > 0){
+        viralContext += `\n🎬 YOUTUBE - EN ÇOK İZLENEN GAYRİMENKUL VİDEOLARI:\n`;
+        ideasData.topYoutube.forEach((v,i)=>{
+          viralContext += `${i+1}. "${v.title.substring(0,70)}" — 👁️${v.views.toLocaleString('tr')} izlenme, ❤️${v.likes} beğeni, ⏱️${v.duration}\n`;
+        });
+      }
+
+      // TikTok verisi
+      if(ideasData.topTiktok && ideasData.topTiktok.length > 0){
+        viralContext += `\n📱 TİKTOK - EN VİRAL GAYRİMENKUL İÇERİKLERİ:\n`;
+        ideasData.topTiktok.forEach((v,i)=>{
+          viralContext += `${i+1}. "${v.caption.substring(0,70)}" — 👁️${v.views.toLocaleString('tr')} oynatma, ❤️${v.likes} beğeni\n`;
+        });
+      }
+
+      // Kendi Instagram verisi
+      if(ideasData.topInstagram && ideasData.topInstagram.length > 0){
+        viralContext += `\n📸 KENDİ INSTAGRAM'IM - EN İYİ GÖNDERILER:\n`;
+        ideasData.topInstagram.forEach((v,i)=>{
+          viralContext += `${i+1}. "${v.caption.substring(0,70)}" — ❤️${v.likes} beğeni, 💬${v.comments} yorum\n`;
+        });
+      }
+
+      viralContext += `\nToplam analiz: YouTube ${ideasData.youtube?.length||0} + TikTok ${ideasData.tiktok?.length||0} + Instagram ${ideasData.instagram?.length||0} içerik\n`;
+
+      // Google Trends
+      if(ideasData.trends && ideasData.trends.rising && ideasData.trends.rising.length > 0){
+        viralContext += `\n📈 GOOGLE TRENDS - TÜRKİYE'DE YÜKSELİŞTEKİ GAYRİMENKUL ARAMALARI:\n`;
+        ideasData.trends.rising.forEach((q,i)=>{
+          const query = q.query||q.title||q;
+          const value = q.value||q.formattedValue||'';
+          viralContext += `${i+1}. "${query}" ${value?'('+value+')':''}\n`;
+        });
+      }
+      if(ideasData.trends && ideasData.trends.top && ideasData.trends.top.length > 0){
+        viralContext += `\nEN ÇOK ARANAN GAYRİMENKUL KONULARI:\n`;
+        ideasData.trends.top.slice(0,5).forEach((q,i)=>{
+          const query = q.query||q.title||q;
+          viralContext += `${i+1}. "${query}"\n`;
+        });
       }
     } else {
       viralContext = '\n\nNOT: Gerçek veri yok, genel bilgiden üretiliyor. "Veriyi Güncelle" tıkla.';
