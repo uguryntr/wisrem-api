@@ -912,7 +912,7 @@ async function updateIdeasData(){
   // 1. YouTube verisi
   try{
     statusEl.innerHTML = '🎬 YouTube gayrimenkul videoları çekiliyor...';
-    const r = await fetch('/api/youtube?type=youtube');
+    const r = await fetch('/api/youtube?type=youtube&t=' + Date.now());
     const data = await r.json();
     if(Array.isArray(data)){
       youtubeData = data.map(v=>({
@@ -974,7 +974,7 @@ async function updateIdeasData(){
   let trendsData = { rising: [], top: [] };
   try{
     statusEl.innerHTML = '📈 Google Trends analiz ediliyor...';
-    const r = await fetch('/api/youtube?type=trends');
+    const r = await fetch('/api/youtube?type=trends&t=' + Date.now());
     const data = await r.json();
     if(Array.isArray(data) && data.length > 0){
       const d = data[0];
