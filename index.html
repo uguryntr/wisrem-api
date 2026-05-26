@@ -1002,23 +1002,55 @@ async function genIdeas(){
     const ownProfile = await MEM.getProfile();
     const ownContext = ownProfile ? `\n\nKENDİ HESABIM: ${ownProfile.summary}` : '';
 
-    const txt=await ai(`Sen @ugurcaglar.wisrem için uzman gayrimenkul içerik stratejistisisin.
-KİŞİ: Uğur Çağlar, Wisrem Gayrimenkul Broker
-KARAKTERİ: Eğitici, storytelling, analitik, güvenilir. Abartısız, gerçekçi.
-PAZARLAR: Türkiye, Kıbrıs, Dubai
-${ownContext}${viralContext}
+    const txt=await ai(`Sen @ugurcaglar.wisrem için uzman gayrimenkul içerik stratejistisi ve senaryo yazarısın.
 
-Yukarıdaki GERÇEK viral veriyi analiz et. Uğur'un karakterine uygun ${cnt} video fikri üret.
-Seri: ${sm[SER]}, Lokasyon: ${lm[loc]}. ${note?'Not: '+note:''}
+KİŞİ PROFİLİ:
+- İsim: Uğur Çağlar, Wisrem Gayrimenkul Broker
+- Karakter: Eğitici, storytelling, analitik, güvenilir. Abartısız, savunulabilir cümleler.
+- Pazarlar: Türkiye, Kıbrıs, Dubai
+- Stil: Masa başından başlayan, sahaya inen, gerçek hikayeler anlatan
+${ownContext}
+${viralContext}
 
-Her fikir için TAM OLARAK:
-FİKİR [n]
-Seri: [seri]
-Başlık: [başlık]
-Hook: [ilk 3 saniye]
-Format: Reels [süre]
-Yayın: [gün + saat]
-Neden: [neden viral olur - veriye dayalı]
+GÖREV: Yukarıdaki GERÇEK Instagram verisini analiz ederek, hangi içeriklerin neden viral olduğunu anla. Uğur'un karakterine ve stiline uygun ${cnt} adet detaylı video fikri ve tam senaryo yaz.
+
+Seri filtresi: ${sm[SER]}
+Lokasyon: ${lm[loc]}
+${note?'Ekstra not: '+note:''}
+
+Her fikir için TAM OLARAK şu formatta yaz:
+
+## FİKİR [n]: [Başlık]
+
+**Seri:** [seri adı]
+**Format:** Reels [süre] saniye
+**Yayın:** [gün, saat]
+**Hedef:** [bu videodan beklenen sonuç]
+
+**Neden Viral Olur:**
+[Gerçek Instagram verisine dayanarak açıkla — hangi benzer içerik kaç like aldı, neden bu format işe yarıyor]
+
+**HOOK (0-3 saniye):**
+[Kameraya bakarak söylenecek tam cümle — dikkat çekici, abartısız]
+
+**TAM SENARYO:**
+[Sahne sahne, kelime kelime konuşma metni. Her sahne için şunu belirt: kamera açısı, ne söylenecek, arka plan/grafik varsa ne gösterilecek]
+
+SAHNE 1 - GİRİŞ (0-5sn):
+[tam metin]
+
+SAHNE 2 - PROBLEM/SORU (5-20sn):
+[tam metin]
+
+SAHNE 3 - ÇÖZÜM/BİLGİ (20-[süre-10]sn):
+[tam metin]
+
+SAHNE 4 - KAPANIŞ CTA (son 5sn):
+[tam metin]
+
+**Hashtag Önerileri:**
+#[hashtag1] #[hashtag2] ... (15-20 hashtag)
+
 ---`);
 
     // AI cevabını --- veya ---- ile böl
