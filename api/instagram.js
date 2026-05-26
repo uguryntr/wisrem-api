@@ -6,6 +6,21 @@ export default async function handler(req, res) {
 
   const { endpoint, token, action, type, target } = req.query;
 
+  // ── TOKEN UZATMA ──────────────────────────────────────
+  if (action === 'refresh_token') {
+    const oldToken = process.env.IG_ACCESS_TOKEN;
+    const appId = process.env.FB_APP_ID;
+    const appSecret = process.env.FB_APP_SECRET;
+    const url = `https://graph.facebook.com/v19.0/oauth/access_token?grant_type=fb_exchange_token&client_id=${appId}&client_secret=${appSecret}&fb_exchange_token=${oldToken}`;
+    try {
+      const r = await fetch(url);
+      const d = await r.json();
+      return res.status(200).json(d);
+    } catch (e) {
+      return res.status(500).json({ error: e.message });
+    }
+  }
+
   // ── APİFY ────────────────────────────────────────────
   if (action === 'apify') {
     const APIFY_TOKEN = process.env.APIFY_TOKEN;
