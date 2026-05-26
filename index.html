@@ -307,17 +307,11 @@ async function loadDashboard(){
     <!-- BİYOGRAFİ -->
     ${bio?`<div class="card"><div class="lbl">Biyografi</div><div style="font-size:13px;line-height:1.6">${bio}</div></div>`:''}`;
 
-    // AI Analizi
-    html+=`<div class="card" style="border-left:4px solid var(--a)">
-      <div class="lbl">🤖 AI Hesap Analizi</div>
-      <div id="ai-dash-out"><div class="ld"><div class="sp"></div>Analiz yapılıyor...</div></div>
-    </div>`;
-
     // Son gönderiler
     if(latestPosts.length>0){
       const sorted=[...latestPosts].sort((a,b)=>(b.likesCount||0)-(a.likesCount||0));
       const bestId=sorted[0]?.id;
-      html+=`<div class="card"><div class="lbl">📸 Son Gönderiler</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px">`;
+      html+=`<div class="card"><div class="lbl">📸 Son Gönderiler</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px">`;
       latestPosts.slice(0,9).forEach(p=>{
         const isBest=p.id===bestId;
         const cap=(p.caption||'').substring(0,70);
@@ -335,17 +329,69 @@ async function loadDashboard(){
       html+=`</div></div>`;
     }
 
+    // AI Keşfet Analizi + Görevler + Soru-Cevap placeholder
+    html+=`
+    <div class="card" style="border-left:4px solid var(--a)">
+      <div class="lbl">🔍 AI Keşfet & Algoritma Analizi</div>
+      <div id="ai-dash-out"><div class="ld"><div class="sp"></div>Analiz yapılıyor...</div></div>
+    </div>
+    <div class="card" style="border-left:4px solid var(--g);display:none" id="task-card">
+      <div class="lbl">✅ Bu Hafta Yapılacaklar</div>
+      <div id="task-list"></div>
+      <div style="margin-top:8px;font-size:10px;color:var(--m);font-family:'DM Mono',monospace">Görevler bu oturumda kaydedilir.</div>
+    </div>
+    <div class="card" style="border-left:4px solid var(--gr)">
+      <div class="lbl">💬 Hesabın Hakkında Soru Sor</div>
+      <div id="qa-history" style="margin-bottom:12px;max-height:300px;overflow-y:auto"></div>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="qa-input" placeholder="Bio'mu nasıl yazmalıyım? Bu hafta ne paylaşsam?" style="margin-bottom:0;flex:1" onkeydown="if(event.key==='Enter')askDash()">
+        <button class="btn btn-d" onclick="askDash()" style="flex-shrink:0">Sor</button>
+      </div>
+    </div>`;
+
     document.getElementById('dash-out').innerHTML=html;
 
     // AI analizi yükle
-    ai(`@ugurcaglar.wisrem hesap analizi. ${followers.toLocaleString('tr')} takipçi, ${posts} gönderi, %${engRate} etkileşim, ${verified?'doğrulanmış':'doğrulanmamış'}. Biyografi: ${bio}. 1) Keşfet durumu 2) Algoritma güçlü/zayıf yönler 3) En iyi yayın saati 4) 3 somut büyüme önerisi. Kısa ve net.`)
-      .then(txt=>{
-        const el=document.getElementById('ai-dash-out');
-        if(el) el.innerHTML=`<div style="font-size:12px;line-height:1.8;color:#444">${txt.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div>`;
-      }).catch(()=>{
-        const el=document.getElementById('ai-dash-out');
-        if(el) el.innerHTML='<div class="wrn">Analiz yüklenemedi</div>';
-      });
+    const aiPrompt=`@ugurcaglar.wisrem Instagram hesap analizi.
+Veriler: ${followers.toLocaleString('tr')} takipçi, ${posts} gönderi, %${engRate} etkileşim oranı, ${verified?'doğrulanmış':'doğrulanmamış'}.
+Biyografi: ${bio}
+
+Şunları analiz et:
+1) KEŞFETTEKİ DURUM: Bu hesap keşfete ne kadar düşüyor ve neden?
+2) ALGORİTMA GÜÇLÜ YÖNLER: Ne iyi yapılıyor?
+3) ALGORİTMA ZAYIF YÖNLER: Ne eksik?
+4) EN İYİ YAYIN SAATİ: Türkiye gayrimenkul nişi için önerilen saatler
+5) HASHTAG STRATEJİSİ: 16K takipçi için ideal strateji
+6) BU HAFTA YAPILACAKLAR: Tam olarak şu formatta yaz — her satıra GÖREV: [görev] yaz, 5 görev
+
+Türkçe, profesyonel, somut ve kısa cevap ver.`;
+
+    ai(aiPrompt).then(txt=>{
+      const el=document.getElementById('ai-dash-out');
+      if(el) el.innerHTML=`<div style="font-size:12px;line-height:1.9;color:#444">${txt.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div>`;
+
+      // Görevleri çıkar
+      const tasks=[];
+      txt.split('\n').forEach(l=>{if(l.includes('GÖREV:')) tasks.push(l.replace('GÖREV:','').trim());});
+      if(tasks.length>0){
+        const taskCard=document.getElementById('task-card');
+        const taskList=document.getElementById('task-list');
+        if(taskCard) taskCard.style.display='block';
+        if(taskList) taskList.innerHTML=tasks.map((t,i)=>`
+          <div onclick="toggleTask(this)" style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--b);cursor:pointer">
+            <div class="task-box" style="width:18px;height:18px;border:2px solid var(--b);border-radius:4px;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:11px;transition:.2s"></div>
+            <div class="task-txt" style="font-size:13px;line-height:1.5;color:var(--t)">${t}</div>
+          </div>`).join('');
+      }
+
+      // QA için profil bilgisini kaydet
+      window._dashProfile={followers,posts,engRate,bio,verified,score};
+    }).catch(()=>{
+      const el=document.getElementById('ai-dash-out');
+      if(el) el.innerHTML='<div class="wrn">Analiz yüklenemedi. Tekrar dene.</div>';
+    });
+
+    window._dashProfile={followers,posts,engRate,bio,verified,score};
 
   }catch(e){
     document.getElementById('dash-out').innerHTML=`<div class="err">❌ ${e.message}</div>`;
@@ -487,6 +533,36 @@ async function genIdeasRaw(){
     document.getElementById('ideas-out').innerHTML=`<div class="card"><div class="res">${txt.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div></div>`;
   }catch(e){document.getElementById('ideas-out').innerHTML=`<div class="err">${e.message}</div>`;}
   btn.disabled=false;
+}
+
+function toggleTask(row){
+  const box=row.querySelector('.task-box');
+  const txt=row.querySelector('.task-txt');
+  const done=box.style.background==='var(--gr)';
+  box.style.background=done?'':'var(--gr)';
+  box.style.borderColor=done?'var(--b)':'var(--gr)';
+  box.textContent=done?'':'✓';
+  box.style.color='#fff';
+  txt.style.textDecoration=done?'':'line-through';
+  txt.style.color=done?'var(--t)':'var(--m)';
+}
+
+async function askDash(){
+  const input=document.getElementById('qa-input');
+  const q=input.value.trim();
+  if(!q) return;
+  input.value='';
+  const history=document.getElementById('qa-history');
+  history.innerHTML+=`<div style="background:var(--a);color:var(--g);padding:8px 12px;border-radius:8px;font-size:12px;margin-bottom:6px;text-align:right">${q}</div>`;
+  const ansId='qa-ans-'+Date.now();
+  history.innerHTML+=`<div id="${ansId}" style="background:var(--s2);padding:8px 12px;border-radius:8px;font-size:12px;margin-bottom:10px;color:#444"><div class="ld" style="padding:0"><div class="sp"></div>Yanıtlanıyor...</div></div>`;
+  const p=window._dashProfile||{};
+  const ansEl=document.getElementById(ansId);
+  try{
+    const txt=await ai(`@ugurcaglar.wisrem hakkında soru: "${q}". Profil: ${p.followers||16400} takipçi, %${p.engRate||0} etkileşim, biyografi: ${p.bio||''}. Kısa ve net Türkçe yanıt ver.`);
+    if(ansEl) ansEl.innerHTML=txt.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+  }catch(e){if(ansEl) ansEl.innerHTML='Yanıt alınamadı.';}
+  history.scrollTop=history.scrollHeight;
 }
 
 function toHook(t){document.getElementById('h-top').value=t;document.querySelectorAll('.tab')[2].click();genHooks();}
