@@ -759,12 +759,32 @@ async function loadCachedDash(){
   const out=document.getElementById('dash-out');
   if(!p){ out.innerHTML='<div class="wrn">Henüz kayıtlı analiz yok. "Verileri Yenile" tıkla.</div>'; return; }
   const ch=await MEM.getChat();
+  const tasks=await MEM.getTasks();
   const summary = p.summary || p.bio || 'Profil verisi';
+
+  // Görev HTML'i oluştur
+  let taskHTML='';
+  if(tasks&&tasks.length>0){
+    taskHTML=`
+    <div class="card" style="border-left:4px solid var(--g)">
+      <div class="lbl">✅ Bu Hafta Yapılacaklar</div>
+      <div>
+        ${tasks.map((t,i)=>`
+          <div class="task-row" id="task-${i}" onclick="toggleTask(${i})" style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--b);cursor:pointer">
+            <div id="task-box-${i}" style="width:18px;height:18px;border:2px solid ${t.done?'var(--gr)':'var(--b)'};border-radius:4px;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:11px;background:${t.done?'var(--gr)':'transparent'};color:${t.done?'#fff':''};transition:.2s">${t.done?'✓':''}</div>
+            <div id="task-text-${i}" style="font-size:13px;line-height:1.5;color:${t.done?'var(--m)':'var(--t)'};text-decoration:${t.done?'line-through':'none'}">${t.text||t}</div>
+          </div>`).join('')}
+      </div>
+      <div style="margin-top:10px;font-size:10px;color:var(--gr);font-family:'DM Mono',monospace">💾 Görev durumları Upstash'e kaydediliyor.</div>
+    </div>`;
+  }
+
   out.innerHTML=`
     <div class="card" style="border-left:4px solid var(--g)">
       <div class="lbl">💾 Kaydedilmiş Analiz — ${p.savedAt||'Bilinmiyor'}</div>
       <div style="font-size:13px;line-height:1.8;color:var(--t)">${summary}</div>
     </div>
+    ${taskHTML}
     <div class="card" style="border-left:4px solid var(--gr)">
       <div class="lbl">💬 Sohbet Geçmişi (${ch.length} mesaj)</div>
       <div id="qa-history" style="max-height:400px;overflow-y:auto;margin-bottom:12px"></div>
