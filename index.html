@@ -1016,7 +1016,7 @@ Yayın: [gün + saat]
 Neden: [neden viral olur - veriye dayalı]
 ---`);
 
-    const ideas=txt.split('---').filter(s=>s.trim());
+    const ideas=txt.split(/---+/).filter(s=>s.trim());
     document.getElementById('ideas-out').innerHTML=
       (ideasData?`<div class="apify-box"><span class="apify-badge">● GERÇEK VERİ</span> ${ideasData.totalPosts} gönderi · ${ideasData.updatedAt}</div>`:'<div class="wrn" style="font-size:11px;margin-bottom:10px">⚠️ Gerçek veri yok — "Veriyi Güncelle" tıkla</div>')+
       ideas.map(idea=>{
