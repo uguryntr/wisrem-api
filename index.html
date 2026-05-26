@@ -537,26 +537,87 @@ async function loadDashboard(){
         </div>`;
     }
 
+    // Gönderi istatistikleri hesapla
+    const avgLikes = latestPosts.length>0 ? Math.round(totalLikes/latestPosts.length) : 0;
+    const avgComments = latestPosts.length>0 ? Math.round(totalComments/latestPosts.length) : 0;
+    const bestPost = latestPosts.length>0 ? [...latestPosts].sort((a,b)=>(b.likesCount||0)-(a.likesCount||0))[0] : null;
+    const videoCount = latestPosts.filter(p=>p.type==='Video'||p.type==='video').length;
+    const videoRatio = latestPosts.length>0 ? Math.round(videoCount/latestPosts.length*100) : 0;
+
+    // Son 30 günde gönderi sayısı
+    const thirtyDaysAgo = new Date(); thirtyDaysAgo.setDate(thirtyDaysAgo.getDate()-30);
+    const recentPosts = latestPosts.filter(p=>p.timestamp && new Date(p.timestamp)>thirtyDaysAgo).length;
+
+    // En iyi gönderi etkileşim oranı
+    const bestEngRate = bestPost&&followers>0 ? (((bestPost.likesCount||0)+(bestPost.commentsCount||0))/followers*100).toFixed(2) : 0;
+
     // 6. Render
     out.innerHTML=`
-      <!-- METRİKLER -->
-      <div class="metric-grid">
-        <div class="metric gold">
-          <div class="metric-val">${followers>=1000?(followers/1000).toFixed(1)+'K':followers}</div>
-          <div class="metric-lbl">Takipçi</div>
-          <div class="metric-sub">@ugurcaglar.wisrem</div>
+      <!-- ÖZET BANNER -->
+      <div style="background:var(--a);border-radius:10px;padding:16px 20px;margin-bottom:16px;display:flex;gap:20px;flex-wrap:wrap;align-items:center">
+        <div style="flex:1;min-width:120px">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:#ffffff60;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px">Hesap</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:var(--g)">@ugurcaglar.wisrem</div>
+          <div style="font-size:10px;color:#ffffff80;margin-top:2px">${verified} · Son 30 günde ${recentPosts} gönderi</div>
         </div>
-        <div class="metric">
-          <div class="metric-val">${posts}</div>
-          <div class="metric-lbl">Gönderi</div>
-          <div class="metric-sub">${verified}</div>
-        </div>
-        <div class="metric">
-          <div class="metric-val">${following.toLocaleString('tr')}</div>
-          <div class="metric-lbl">Takip Edilen</div>
-          <div class="metric-sub">Oran: 1/${Math.round(followers/(following||1))}</div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap">
+          <div style="text-align:center">
+            <div style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;color:#fff">${followers>=1000?(followers/1000).toFixed(1)+'K':followers}</div>
+            <div style="font-size:9px;color:#ffffff60;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:1px">Takipçi</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;color:var(--g)">%${engRate}</div>
+            <div style="font-size:9px;color:#ffffff60;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:1px">Etkileşim</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;color:#fff">${score}</div>
+            <div style="font-size:9px;color:#ffffff60;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:1px">Skor</div>
+          </div>
         </div>
       </div>
+
+      <!-- METRİK KARTLAR -->
+      <div class="metric-grid" style="grid-template-columns:repeat(3,1fr)">
+        <div class="metric gold">
+          <div style="font-size:10px;color:var(--m);font-family:'DM Mono',monospace;margin-bottom:8px">❤️ ORT. BEĞENİ</div>
+          <div class="metric-val">${avgLikes}</div>
+          <div class="metric-lbl">gönderi başına</div>
+          <div style="margin-top:10px;background:var(--s2);border-radius:20px;height:4px;overflow:hidden">
+            <div style="height:100%;width:${Math.min(avgLikes/500*100,100)}%;background:var(--g);border-radius:20px"></div>
+          </div>
+        </div>
+        <div class="metric green">
+          <div style="font-size:10px;color:var(--m);font-family:'DM Mono',monospace;margin-bottom:8px">💬 ORT. YORUM</div>
+          <div class="metric-val">${avgComments}</div>
+          <div class="metric-lbl">gönderi başına</div>
+          <div style="margin-top:10px;background:var(--s2);border-radius:20px;height:4px;overflow:hidden">
+            <div style="height:100%;width:${Math.min(avgComments/100*100,100)}%;background:var(--gr);border-radius:20px"></div>
+          </div>
+        </div>
+        <div class="metric">
+          <div style="font-size:10px;color:var(--m);font-family:'DM Mono',monospace;margin-bottom:8px">🎬 VİDEO ORANI</div>
+          <div class="metric-val">%${videoRatio}</div>
+          <div class="metric-lbl">${videoCount}/${latestPosts.length} gönderi</div>
+          <div style="margin-top:10px;background:var(--s2);border-radius:20px;height:4px;overflow:hidden">
+            <div style="height:100%;width:${videoRatio}%;background:var(--a);border-radius:20px"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EN İYİ GÖNDERI BANNER -->
+      ${bestPost?`
+      <div style="background:linear-gradient(135deg,#e8f5e9,#f0fff4);border:1px solid var(--gr);border-radius:10px;padding:16px;margin-bottom:14px;display:flex;gap:14px;align-items:flex-start">
+        <div style="font-size:28px;flex-shrink:0">🏆</div>
+        <div style="flex:1">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--gr);text-transform:uppercase;letter-spacing:2px;margin-bottom:5px">En İyi Gönderi</div>
+          <div style="font-size:13px;font-weight:600;color:var(--a);line-height:1.4;margin-bottom:8px">${(bestPost.caption||'').substring(0,80)}${(bestPost.caption||'').length>80?'...':''}</div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--gr)">❤️ ${bestPost.likesCount||0} beğeni</span>
+            <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--gr)">💬 ${bestPost.commentsCount||0} yorum</span>
+            <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--gr)">📊 %${bestEngRate} etkileşim</span>
+          </div>
+        </div>
+      </div>`:''}
 
       <!-- BİYO -->
       ${bio?`<div class="card" style="border-left:4px solid var(--g)">
@@ -569,15 +630,21 @@ async function loadDashboard(){
         <div class="lbl">🤖 Algoritma Sağlık Skoru</div>
         <div class="score-ring">
           <div class="ring ${scoreClass}">${score}</div>
-          <div>
+          <div style="flex:1">
             <div style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--a);margin-bottom:4px">
               ${score>=70?'Güçlü Hesap':score>=40?'Geliştirilmeli':'Kritik Durum'}
             </div>
             <div style="font-size:12px;color:var(--m);line-height:1.6">
-              ${followers.toLocaleString('tr')} takipçi · ${posts} gönderi · %${engRate} etkileşim tahmini
+              ${followers.toLocaleString('tr')} takipçi · ${posts} gönderi · %${engRate} etkileşim
             </div>
             <div class="score-bar" style="margin-top:10px">
               <div class="score-fill" style="width:${score}%"></div>
+            </div>
+            <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+              <span style="font-size:9px;padding:3px 8px;border-radius:3px;font-family:'DM Mono',monospace;background:${followers>10000?'#e8f5e9':'#fdecea'};color:${followers>10000?'var(--gr)':'var(--r)'}">👥 ${followers>10000?'✓':'✗'} 10K+ Takipçi</span>
+              <span style="font-size:9px;padding:3px 8px;border-radius:3px;font-family:'DM Mono',monospace;background:${posts>40?'#e8f5e9':'#fdecea'};color:${posts>40?'var(--gr)':'var(--r)'}">📝 ${posts>40?'✓':'✗'} 40+ Gönderi</span>
+              <span style="font-size:9px;padding:3px 8px;border-radius:3px;font-family:'DM Mono',monospace;background:${engRate>1?'#e8f5e9':'#fdecea'};color:${engRate>1?'var(--gr)':'var(--r)'}">💫 ${engRate>1?'✓':'✗'} %1+ Etkileşim</span>
+              <span style="font-size:9px;padding:3px 8px;border-radius:3px;font-family:'DM Mono',monospace;background:${videoRatio>50?'#e8f5e9':'#fff8e1'};color:${videoRatio>50?'var(--gr)':'#7a5f00'}">🎬 %${videoRatio} Video</span>
             </div>
           </div>
         </div>
