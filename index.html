@@ -418,7 +418,22 @@ Neden: [kısa gerekçe]
       });
       if(!b) return '';
       return `<div class="idea"><div class="idea-s">${s}</div><div class="idea-t">${b}</div><div class="idea-h">"${h}"</div>${n?`<div style="font-size:11px;color:var(--m);margin-bottom:7px">→ ${n}</div>`:''}<div class="tags"><span class="tag tag-g">🎬 ${f}</span><span class="tag" style="border-color:var(--gr);color:var(--gr)">📅 ${y}</span><button class="tag tag-a" onclick="toHook('${b.replace(/'/g,"\\'").replace(/"/g,'\\"')}')">Hook →</button></div></div>`;
-    }).join('')||`<div class="res">${txt}</div>`;
+    }).join('');if(!document.getElementById('ideas-out').querySelector('.idea')){document.getElementById('ideas-out').innerHTML=`<div class="card"><div class="res">${txt.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div></div>`;}
+  }catch(e){document.getElementById('ideas-out').innerHTML=`<div class="err">${e.message}</div>`;}
+  btn.disabled=false;
+}
+
+async function genIdeasRaw(){
+  const cnt=document.getElementById('i-cnt').value;
+  const loc=document.getElementById('i-loc').value;
+  const note=document.getElementById('i-note').value;
+  const btn=document.getElementById('btn-ideas');
+  btn.disabled=true; ld('ideas-out');
+  const sm={all:'karma',egitim:'Gayrimenkul Okulu',proje:'Proje Tanıtım',yatirim:'Yatırım Analizi',hukuk:'Gayrimenkul Hukuku',tapu:'Tapu Bilgileri'};
+  const lm={genel:'Türkiye',kibris:'Kıbrıs',dubai:'Dubai',istanbul:'İstanbul'};
+  try{
+    const txt=await ai(`${cnt} video fikri üret. Seri: ${sm[SER]}, Lokasyon: ${lm[loc]}. ${note?'Not: '+note:''}. Türkçe, kısa ve net.`);
+    document.getElementById('ideas-out').innerHTML=`<div class="card"><div class="res">${txt.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div></div>`;
   }catch(e){document.getElementById('ideas-out').innerHTML=`<div class="err">${e.message}</div>`;}
   btn.disabled=false;
 }
