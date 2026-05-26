@@ -227,7 +227,7 @@ const SYS=`Sen @ugurcaglar.wisrem için gayrimenkul içerik stratejistisisin. U�
 async function ai(p){
   const r=await fetch('/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({system:SYS,prompt:p})});
   const d=await r.json();
-  return d.content?d.content.map(b=>b.text||'').join(''):(d.error||'Hata');
+  return d.result||d.content?.map(b=>b.text||'').join('')||d.error||'Hata';
 }
 
 function go(id,btn){
