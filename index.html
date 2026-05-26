@@ -266,36 +266,87 @@ async function loadDashboard(){
     let totalLikes=0,totalComments=0;
     if(latestPosts.length>0){
       latestPosts.forEach(p=>{totalLikes+=(p.likesCount||0);totalComments+=(p.commentsCount||0);});
-      var engRate=followers>0?(((totalLikes+totalComments)/latestPosts.length)/followers*100).toFixed(2):0;
-    } else { var engRate=0; }
+    }
+    const engRate=followers>0?(((totalLikes+totalComments)/Math.max(latestPosts.length,1))/followers*100).toFixed(2):0;
 
-    let html=`<div class="stats">
+    // Algoritma skoru
+    const eng=parseFloat(engRate);
+    let score=0;
+    if(eng>=3) score=90;
+    else if(eng>=2) score=75;
+    else if(eng>=1) score=55;
+    else if(eng>=0.5) score=35;
+    else score=20;
+    if(verified) score=Math.min(100,score+5);
+    if(posts>=50) score=Math.min(100,score+5);
+    const scoreLabel=score>=70?'💚 Güçlü Hesap':score>=40?'🟡 Gelişiyor':'🔴 Düşük';
+    const scoreColor=score>=70?'var(--gr)':score>=40?'#c9a84c':'var(--r)';
+
+    let html=`
+    <!-- METRİKLER -->
+    <div class="stats">
       <div class="stat"><div class="stn">${followers>=1000?(followers/1000).toFixed(1)+'K':followers}</div><div class="stl">Takipçi</div></div>
       <div class="stat"><div class="stn">${posts}</div><div class="stl">Gönderi</div></div>
       <div class="stat"><div class="stn">%${engRate}</div><div class="stl">Etkileşim</div></div>
-      <div class="stat"><div class="stn">${verified?'✓':'—'}</div><div class="stl">Doğrulanmış</div></div>
+      <div class="stat"><div class="stn">${verified?'✓ Onaylı':'—'}</div><div class="stl">Rozet</div></div>
+    </div>
+
+    <!-- ALGORİTMA SKORU -->
+    <div class="card" style="border-left:4px solid ${scoreColor};margin-bottom:14px">
+      <div class="lbl">📊 ALGORİTMA SKORU</div>
+      <div style="display:flex;align-items:center;gap:16px">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:52px;font-weight:700;color:${scoreColor};line-height:1">${score}</div>
+        <div>
+          <div style="font-size:14px;font-weight:600;color:var(--a);margin-bottom:4px">${scoreLabel}</div>
+          <div style="font-size:11px;color:var(--m)">Etkileşim oranı %${engRate} · ${posts} gönderi · ${verified?'Doğrulanmış':'Doğrulanmamış'}</div>
+          <div style="margin-top:8px;background:var(--s2);border-radius:4px;height:6px;width:200px"><div style="background:${scoreColor};width:${score}%;height:6px;border-radius:4px;transition:width .5s"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BİYOGRAFİ -->
+    ${bio?`<div class="card"><div class="lbl">Biyografi</div><div style="font-size:13px;line-height:1.6">${bio}</div></div>`:''}`;
+
+    // AI Analizi
+    html+=`<div class="card" style="border-left:4px solid var(--a)">
+      <div class="lbl">🤖 AI Hesap Analizi</div>
+      <div id="ai-dash-out"><div class="ld"><div class="sp"></div>Analiz yapılıyor...</div></div>
     </div>`;
 
-    if(bio) html+=`<div class="card"><div class="lbl">Biyografi</div><div style="font-size:13px">${bio}</div></div>`;
-
+    // Son gönderiler
     if(latestPosts.length>0){
       const sorted=[...latestPosts].sort((a,b)=>(b.likesCount||0)-(a.likesCount||0));
       const bestId=sorted[0]?.id;
-      html+=`<div class="card"><div class="lbl">📸 Son Gönderiler</div>`;
+      html+=`<div class="card"><div class="lbl">📸 Son Gönderiler</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px">`;
       latestPosts.slice(0,9).forEach(p=>{
         const isBest=p.id===bestId;
-        const cap=(p.caption||'').substring(0,60);
+        const cap=(p.caption||'').substring(0,70);
         const dt=p.timestamp?new Date(p.timestamp).toLocaleDateString('tr-TR'):'';
-        html+=`<div class="post" style="${isBest?'border-color:var(--g);border-width:2px':''}">
-          ${isBest?'<div class="lbl" style="color:var(--gr)">⭐ EN İYİ GÖNDERI</div>':''}
+        html+=`<div class="post" style="${isBest?'border:2px solid var(--g);background:#fffdf5':''}">
+          ${isBest?'<div style="font-size:9px;color:var(--g);font-family:DM Mono,monospace;letter-spacing:1px;margin-bottom:4px">⭐ EN İYİ GÖNDERI</div>':''}
           <div class="post-c">${cap||'(başlık yok)'}</div>
-          <div class="post-s"><span>❤️${p.likesCount||0}</span><span>💬${p.commentsCount||0}</span><span>${dt}</span></div>
+          <div class="post-s">
+            <span>❤️ ${(p.likesCount||0).toLocaleString('tr')}</span>
+            <span>💬 ${(p.commentsCount||0).toLocaleString('tr')}</span>
+            <span>📅 ${dt}</span>
+          </div>
         </div>`;
       });
-      html+=`</div>`;
+      html+=`</div></div>`;
     }
 
     document.getElementById('dash-out').innerHTML=html;
+
+    // AI analizi yükle
+    ai(`@ugurcaglar.wisrem hesap analizi. ${followers.toLocaleString('tr')} takipçi, ${posts} gönderi, %${engRate} etkileşim, ${verified?'doğrulanmış':'doğrulanmamış'}. Biyografi: ${bio}. 1) Keşfet durumu 2) Algoritma güçlü/zayıf yönler 3) En iyi yayın saati 4) 3 somut büyüme önerisi. Kısa ve net.`)
+      .then(txt=>{
+        const el=document.getElementById('ai-dash-out');
+        if(el) el.innerHTML=`<div style="font-size:12px;line-height:1.8;color:#444">${txt.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div>`;
+      }).catch(()=>{
+        const el=document.getElementById('ai-dash-out');
+        if(el) el.innerHTML='<div class="wrn">Analiz yüklenemedi</div>';
+      });
+
   }catch(e){
     document.getElementById('dash-out').innerHTML=`<div class="err">❌ ${e.message}</div>`;
   }
