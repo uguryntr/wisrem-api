@@ -221,6 +221,21 @@ textarea{resize:vertical;min-height:80px}
 let SER='all';
 let ideasData={youtube:[],tiktok:[],instagram:[],trends:{}};
 
+// localStorage'dan yükle
+try{
+  const saved=localStorage.getItem('wisrem_ideas_data');
+  if(saved){
+    ideasData=JSON.parse(saved);
+    const savedTime=localStorage.getItem('wisrem_ideas_time');
+    if(savedTime){
+      document.addEventListener('DOMContentLoaded',()=>{
+        const el=document.getElementById('data-status');
+        if(el) el.innerHTML=`✅ Güncellendi: ${savedTime} — YouTube: ${ideasData.youtube.length} · TikTok: ${ideasData.tiktok.length} · Instagram: ${ideasData.instagram.length} · Trends: ${(ideasData.trends.rising||[]).length+(ideasData.trends.top||[]).length}`;
+      });
+    }
+  }
+}catch(e){}
+
 const SYS=`Sen @ugurcaglar.wisrem için gayrimenkul içerik stratejistisisin. Uğur Çağlar, Wisrem Broker, 16.400+ takipçi, Türkiye/Kıbrıs/Dubai. Seriler: Gayrimenkul Okulu, Hukuk, Gündem, Tapu, Proje Tanıtım. Referans: Bölüm 1 → TikTok 66.600, IG 14.054 görüntüleme, 143 kaydetme, 401 takipçi. Ton: Profesyonel, veriye dayalı, abartısız. Türkçe cevap ver.`;
 
 // AI - /api/ai üzerinden (CORS yok)
@@ -460,6 +475,13 @@ async function updateIdeasData(){
 
   const now=new Date().toLocaleString('tr-TR');
   statusEl.innerHTML=`✅ Güncellendi: ${now} — YouTube: ${youtubeData.length} · TikTok: ${tiktokData.length} · Instagram: ${instagramData.length} · Trends: ${trendsData.rising.length+trendsData.top.length}`;
+  
+  // localStorage'a kaydet
+  try{
+    localStorage.setItem('wisrem_ideas_data',JSON.stringify(ideasData));
+    localStorage.setItem('wisrem_ideas_time',now);
+  }catch(e){}
+  
   btn.disabled=false;
 }
 
