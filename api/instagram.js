@@ -62,8 +62,7 @@ export default async function handler(req, res) {
         const keywords = target ? [target] : ['gayrimenkul', 'emlak', 'kıbrıs gayrimenkul', 'dubai gayrimenkul', 'yatırım'];
         data = await runApify('streamers~youtube-scraper', {
           searchTerms: keywords,
-          maxResultsPerSearch: 10,
-          maxVideosPerSearch: 10
+          maxVideos: 10
         });
 
       } else if (type === 'tiktok') {
@@ -78,9 +77,8 @@ export default async function handler(req, res) {
         // Google Trends scraper
         const keyword = target || 'gayrimenkul';
         data = await runApify('apify~google-trends-scraper', {
-          searchTerms: [keyword, 'emlak', 'konut yatırım', 'kıbrıs gayrimenkul', 'dubai gayrimenkul'],
-          geo: 'TR',
-          timeRange: 'today 3-m'
+          searchTerms: [keyword, 'emlak', 'tapu', 'konut yatırım', 'kıbrıs gayrimenkul'],
+          geo: 'TR'
         });
       }
 
