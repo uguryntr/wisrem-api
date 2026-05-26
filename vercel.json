@@ -1,0 +1,10 @@
+{
+  "functions": {
+    "api/youtube.js": {
+      "maxDuration": 300
+    },
+    "api/instagram.js": {
+      "maxDuration": 300
+    }
+  }
+}
