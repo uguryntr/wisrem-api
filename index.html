@@ -909,81 +909,78 @@ async function updateIdeasData(){
   let tiktokData = [];
   let instagramData = [];
 
-  // 1. YouTube verisi
-  try{
-    statusEl.innerHTML = '🎬 YouTube gayrimenkul videoları çekiliyor...';
-    const r = await fetch('/api/youtube?type=youtube&t=' + Date.now());
-    const data = await r.json();
-    if(Array.isArray(data)){
-      youtubeData = data.map(v=>({
-        source: 'youtube',
-        title: v.title||'',
-        caption: v.title||'',
-        views: v.viewCount||0,
-        likes: v.likes||0,
-        comments: v.commentsCount||0,
-        duration: v.duration||'',
-        url: v.url||'',
-        channel: v.channelName||'',
-        publishedAt: v.date||''
-      })).filter(v=>v.title);
-    }
-    statusEl.innerHTML = `✅ YouTube: ${youtubeData.length} video`;
-  }catch(e){ console.log('YouTube hata:', e); }
+  // 1. YouTube verisi - paralel başlat
+  statusEl.innerHTML = '🔄 YouTube + TikTok + Instagram + Trends paralel çekiliyor...';
+  const youtubeFetch = fetch('/api/instagram?action=apify&type=youtube&t=' + Date.now())
+    .then(r=>r.json())
+    .then(data=>{
+      if(Array.isArray(data)){
+        youtubeData = data.map(v=>({
+          source: 'youtube',
+          title: v.title||'',
+          caption: v.title||'',
+          views: v.viewCount||0,
+          likes: v.likes||0,
+          comments: v.commentsCount||0,
+          duration: v.duration||'',
+          url: v.url||'',
+          channel: v.channelName||'',
+          publishedAt: v.date||''
+        })).filter(v=>v.title);
+      }
+    }).catch(e=>console.log('YouTube hata:', e));
 
-  // 2. TikTok verisi
-  try{
-    statusEl.innerHTML = '📱 TikTok gayrimenkul içerikleri çekiliyor...';
-    const r = await fetch('/api/instagram?action=apify&type=tiktok&target=gayrimenkul');
-    const data = await r.json();
-    if(Array.isArray(data)){
-      tiktokData = data.map(v=>({
-        source: 'tiktok',
-        title: (v.text||v.desc||'').substring(0,100),
-        caption: v.text||v.desc||'',
-        views: v.playCount||v.plays||0,
-        likes: v.diggCount||v.likes||0,
-        comments: v.commentCount||v.comments||0,
-        shares: v.shareCount||0,
-        author: v.authorMeta?.name||v.author||''
-      })).filter(v=>v.caption);
-    }
-    statusEl.innerHTML = `✅ TikTok: ${tiktokData.length} video`;
-  }catch(e){ console.log('TikTok hata:', e); }
+  // 2. TikTok verisi - paralel başlat
+  const tiktokFetch = fetch('/api/instagram?action=apify&type=tiktok&target=gayrimenkul&t=' + Date.now())
+    .then(r=>r.json())
+    .then(data=>{
+      if(Array.isArray(data)){
+        tiktokData = data.map(v=>({
+          source: 'tiktok',
+          title: (v.text||v.desc||'').substring(0,100),
+          caption: v.text||v.desc||'',
+          views: v.playCount||v.plays||0,
+          likes: v.diggCount||v.likes||0,
+          comments: v.commentCount||v.comments||0,
+          shares: v.shareCount||0,
+          author: v.authorMeta?.name||v.author||''
+        })).filter(v=>v.caption);
+      }
+    }).catch(e=>console.log('TikTok hata:', e));
 
-  // 3. Kendi Instagram hesabı
-  try{
-    statusEl.innerHTML = '📸 Kendi Instagram hesabın analiz ediliyor...';
-    const r = await fetch('/api/instagram?action=apify&type=own');
-    const raw = await r.json();
-    const profile = Array.isArray(raw) ? raw[0] : raw;
-    if(profile && profile.latestPosts){
-      instagramData = profile.latestPosts.map(p=>({
-        source: 'instagram_own',
-        caption: p.caption||'',
-        likes: p.likesCount||0,
-        comments: p.commentsCount||0,
-        type: p.type||'video',
-        timestamp: p.timestamp||''
-      }));
-    }
-    statusEl.innerHTML = `✅ Instagram: ${instagramData.length} gönderi`;
-  }catch(e){ console.log('Instagram hata:', e); }
+  // 3. Instagram - paralel başlat
+  const igFetch = fetch('/api/instagram?action=apify&type=own&t=' + Date.now())
+    .then(r=>r.json())
+    .then(raw=>{
+      const profile = Array.isArray(raw) ? raw[0] : raw;
+      if(profile && profile.latestPosts){
+        instagramData = profile.latestPosts.map(p=>({
+          source: 'instagram_own',
+          caption: p.caption||'',
+          likes: p.likesCount||0,
+          comments: p.commentsCount||0,
+          type: p.type||'video',
+          timestamp: p.timestamp||''
+        }));
+      }
+    }).catch(e=>console.log('Instagram hata:', e));
 
-  // 4. Google Trends
+  // 4. Google Trends - paralel başlat
   let trendsData = { rising: [], top: [] };
-  try{
-    statusEl.innerHTML = '📈 Google Trends analiz ediliyor...';
-    const r = await fetch('/api/youtube?type=trends&t=' + Date.now());
-    const data = await r.json();
-    if(Array.isArray(data) && data.length > 0){
-      const d = data[0];
-      trendsData.rising = (d.relatedQueriesRising||[]).slice(0,10);
-      trendsData.top = (d.relatedQueriesTop||[]).slice(0,10);
-      trendsData.interestOverTime = d.interestOverTime_averages||[];
-    }
-    statusEl.innerHTML = `✅ Google Trends: ${trendsData.rising.length} yükselen konu`;
-  }catch(e){ console.log('Trends hata:', e); }
+  const trendsFetch = fetch('/api/instagram?action=apify&type=trends&t=' + Date.now())
+    .then(r=>r.json())
+    .then(data=>{
+      if(Array.isArray(data) && data.length > 0){
+        const d = data[0];
+        trendsData.rising = (d.relatedQueriesRising||[]).slice(0,10);
+        trendsData.top = (d.relatedQueriesTop||[]).slice(0,10);
+        trendsData.interestOverTime = d.interestOverTime_averages||[];
+      }
+    }).catch(e=>console.log('Trends hata:', e));
+  
+  // Tüm paralel işlemlerin bitmesini bekle
+  statusEl.innerHTML = '⏳ Tüm kaynaklar paralel çekiliyor... (~2-3 dakika)';
+  await Promise.all([youtubeFetch, tiktokFetch, igFetch, trendsFetch]);
 
   // En viral içerikleri belirle
   const allContent = [...youtubeData, ...tiktokData, ...instagramData];
